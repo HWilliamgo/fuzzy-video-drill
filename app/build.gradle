@@ -3,13 +3,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 28
     buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "com.hwilliamgo.fuzzy_video_drill"
-        minSdkVersion 16
-        targetSdkVersion 30
+        minSdkVersion 23
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
@@ -34,4 +34,11 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
+
+    //utilcodex
+    implementation 'com.blankj:utilcodex:1.25.9'
+    //fastpermission
+    implementation "com.hwilliamgo:fastpermission-x:1.0.0"
+    //websocket
+    implementation "org.java-websocket:Java-WebSocket:1.4.0"
 }
