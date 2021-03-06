@@ -11,7 +11,7 @@ import java.net.InetSocketAddress
  * author: HWilliamgo
  * description:
  */
-class SocketPush(private val port: Int, private val codecLiveH265: CodecLiveH265) {
+class SocketPush(private val port: Int) {
     // <editor-fold defaultstate="collapsed" desc="变量">
     private var webSocket: WebSocket? = null
     private val webSocketServer = object : WebSocketServer(InetSocketAddress(port)) {
@@ -41,7 +41,6 @@ class SocketPush(private val port: Int, private val codecLiveH265: CodecLiveH265
     // <editor-fold defaultstate="collapsed" desc="API">
     fun start() {
         webSocketServer.start()
-        codecLiveH265.startLive()
     }
 
     fun close() {
