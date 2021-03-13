@@ -5,8 +5,8 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
-import com.blankj.utilcode.util.NetworkUtils
 import com.blankj.utilcode.util.ToastUtils
+import com.hwilliamgo.fuzzy_video_drill.cameratest.CameraTestActivity
 import com.hwilliamgo.fuzzy_video_drill.screenprojection.ScreenProjectionPushActivity
 import com.hwilliamgo.fuzzy_video_drill.screenprojection.ScreenProjectionWatchActivity
 
@@ -15,6 +15,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnToScreenProjectionPush: Button
     private lateinit var btnToScreenProjectionWatch: Button
     private lateinit var etPushServerIpAddress: EditText
+    private lateinit var btnJumpToCameraTest: Button
+
 
     // </editor-fold>
 
@@ -34,6 +36,7 @@ class MainActivity : AppCompatActivity() {
         btnToScreenProjectionPush = findViewById(R.id.btn_to_screen_projection_push)
         btnToScreenProjectionWatch = findViewById(R.id.btn_to_screen_projection_watch)
         etPushServerIpAddress = findViewById(R.id.et_push_server_ip_address)
+        btnJumpToCameraTest = findViewById(R.id.btn_jump_to_camera_test)
     }
 
     private fun initView() {
@@ -47,6 +50,10 @@ class MainActivity : AppCompatActivity() {
             } else {
                 ScreenProjectionWatchActivity.launch(this, ipAddr)
             }
+        }
+
+        btnJumpToCameraTest.setOnClickListener {
+            startActivity(Intent(this, CameraTestActivity::class.java))
         }
     }
     // </editor-fold>

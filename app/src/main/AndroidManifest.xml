@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".VideoDrillApp"
@@ -14,7 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".videocall.VideoCallActivity"></activity>
+        <activity android:name=".cameratest.CameraTestActivity"></activity>
+        <activity android:name=".videocall.VideoCallActivity" />
         <activity android:name=".screenprojection.ScreenProjectionWatchActivity" />
         <activity android:name=".screenprojection.ScreenProjectionPushActivity" />
         <activity android:name=".MainActivity">
