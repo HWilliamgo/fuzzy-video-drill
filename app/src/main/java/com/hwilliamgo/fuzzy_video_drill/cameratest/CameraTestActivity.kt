@@ -7,6 +7,8 @@ import android.graphics.YuvImage
 import android.hardware.Camera
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.HandlerThread
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.widget.Button
@@ -20,22 +22,32 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
+import java.util.concurrent.Executors
 
 class CameraTestActivity : AppCompatActivity() {
 
     // <editor-fold defaultstate="collapsed" desc="变量">
+    /**** view ****/
     private lateinit var cameraTestSurfaceView: SurfaceView
     private lateinit var cameraTestBtnCapture: Button
 
+    /**** camera ****/
     private var camera: Camera? = null
     private var cameraWidth = 0
     private var cameraHeight = 0
 
+    // camera preview buffer
     private var buffer: ByteArray? = null
 
     @Volatile
     private var isCapture: Boolean = false
     private var captureIndex = 0
+
+    /**** thread ****/
+    private var cameraHandlerThread: HandlerThread? = null
+    private var cameraHandler: Handler? = null
+    private val executor = Executors.newSingleThreadExecutor()
+
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Activity生命周期回调">
@@ -43,10 +55,24 @@ class CameraTestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera_test)
 
+        findView()
+        initView()
+
         requestPermission {
-            findView()
-            initView()
+            initCameraThread {
+                cameraHandler?.post {
+                    startPreviewCamera()
+                }
+            }
         }
+    }
+
+    override fun onDestroy() {
+        camera?.release()
+        cameraHandler?.removeCallbacksAndMessages(null)
+        cameraHandlerThread?.quit()
+        executor.shutdown()
+        super.onDestroy()
     }
     // </editor-fold>
 
@@ -64,7 +90,6 @@ class CameraTestActivity : AppCompatActivity() {
         cameraTestSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder?) {
                 LogUtils.d("CameraTestActivity.surfaceCreated")
-                startPreviewCamera()
             }
 
             override fun surfaceChanged(
@@ -98,10 +123,14 @@ class CameraTestActivity : AppCompatActivity() {
                 it.addCallbackBuffer(buffer)
                 it.setPreviewCallbackWithBuffer { data, camera ->
                     if (isCapture) {
+                        val copyBuffer = ByteArray(buffer!!.size)
+                        buffer!!.copyInto(copyBuffer)
                         LogUtils.d("setPreviewCallbackWithBuffer hash=${data.hashCode()}")
                         isCapture = false
-                        rotateYUV(buffer!!)
-                        capture(buffer!!)
+                        executor.submit {
+                            rotateYUV(copyBuffer)
+                            capture(copyBuffer)
+                        }
                     }
                     camera.addCallbackBuffer(data)
                 }
@@ -121,6 +150,20 @@ class CameraTestActivity : AppCompatActivity() {
     }
     // </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="初始化工作线程">
+    private fun initCameraThread(cb: () -> Unit) {
+        cameraHandlerThread = object : HandlerThread("cameraHandlerThread") {
+            override fun onLooperPrepared() {
+                cameraHandler = Handler()
+                runOnUiThread {
+                    cb()
+                }
+            }
+        }
+        cameraHandlerThread?.start()
+    }
+    // </editor-fold>
+
     // <editor-fold defaultstate="collapsed" desc="旋转yuv数据">
     private fun rotateYUV(data: ByteArray) {
         if (cameraHeight * cameraWidth <= 0) {
@@ -129,7 +172,7 @@ class CameraTestActivity : AppCompatActivity() {
 
         val source = ByteArray(data.size)
         data.copyInto(source)
-        val dst = buffer ?: return
+        val dst = data
 
         val oldW = cameraWidth
         val oldH = cameraHeight
