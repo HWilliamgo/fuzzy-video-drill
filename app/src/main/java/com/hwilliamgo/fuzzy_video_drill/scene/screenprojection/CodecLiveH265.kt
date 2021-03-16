@@ -1,4 +1,4 @@
-package com.hwilliamgo.fuzzy_video_drill.screenprojection
+package com.hwilliamgo.fuzzy_video_drill.scene.screenprojection
 
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay

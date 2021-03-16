@@ -1,4 +1,4 @@
-package com.hwilliamgo.fuzzy_video_drill.screenprojection
+package com.hwilliamgo.fuzzy_video_drill.scene.screenprojection
 
 import com.blankj.utilcode.util.LogUtils
 import org.java_websocket.WebSocket

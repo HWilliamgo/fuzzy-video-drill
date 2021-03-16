@@ -1,14 +1,11 @@
-package com.hwilliamgo.fuzzy_video_drill.cameratest
+package com.hwilliamgo.fuzzy_video_drill.scene.cameratest
 
 import android.Manifest
 import android.graphics.ImageFormat
 import android.graphics.Rect
 import android.graphics.YuvImage
-import android.hardware.Camera
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
-import android.os.HandlerThread
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.widget.Button
@@ -16,6 +13,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.hwilliamgo.fuzzy_video_drill.R
+import com.hwilliamgo.fuzzy_video_drill.camera.ICamera
+import com.hwilliamgo.fuzzy_video_drill.camera.SimpleCamera
+import com.hwilliamgo.fuzzy_video_drill.util.rotateYUVClockwise90
 import com.william.fastpermisssion.FastPermission
 import com.william.fastpermisssion.OnPermissionCallback
 import java.io.File
@@ -32,20 +32,15 @@ class CameraTestActivity : AppCompatActivity() {
     private lateinit var cameraTestBtnCapture: Button
 
     /**** camera ****/
-    private var camera: Camera? = null
+    private var camera: ICamera? = null
     private var cameraWidth = 0
     private var cameraHeight = 0
-
-    // camera preview buffer
-    private var buffer: ByteArray? = null
 
     @Volatile
     private var isCapture: Boolean = false
     private var captureIndex = 0
 
     /**** thread ****/
-    private var cameraHandlerThread: HandlerThread? = null
-    private var cameraHandler: Handler? = null
     private val executor = Executors.newSingleThreadExecutor()
 
     // </editor-fold>
@@ -59,18 +54,12 @@ class CameraTestActivity : AppCompatActivity() {
         initView()
 
         requestPermission {
-            initCameraThread {
-                cameraHandler?.post {
-                    startPreviewCamera()
-                }
-            }
+            startPreviewCamera()
         }
     }
 
     override fun onDestroy() {
-        camera?.release()
-        cameraHandler?.removeCallbacksAndMessages(null)
-        cameraHandlerThread?.quit()
+        camera?.destroy()
         executor.shutdown()
         super.onDestroy()
     }
@@ -110,100 +99,24 @@ class CameraTestActivity : AppCompatActivity() {
 
     // <editor-fold defaultstate="collapsed" desc="初始化 - 相机">
     private fun startPreviewCamera() {
-        camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK)
-        camera?.let {
-            val parameters = it.parameters
-            cameraWidth = parameters.previewSize.width
-            cameraHeight = parameters.previewSize.height
-            try {
-                it.setPreviewDisplay(cameraTestSurfaceView.holder)
-                it.setDisplayOrientation(90)
-                buffer = ByteArray(cameraWidth * cameraHeight * 3 / 2)
-                LogUtils.d("buffer hash=${buffer.hashCode()}")
-                it.addCallbackBuffer(buffer)
-                it.setPreviewCallbackWithBuffer { data, camera ->
-                    if (isCapture) {
-                        val copyBuffer = ByteArray(buffer!!.size)
-                        buffer!!.copyInto(copyBuffer)
-                        LogUtils.d("setPreviewCallbackWithBuffer hash=${data.hashCode()}")
-                        isCapture = false
-                        executor.submit {
-                            rotateYUV(copyBuffer)
-                            capture(copyBuffer)
-                        }
-                    }
-                    camera.addCallbackBuffer(data)
+        camera = SimpleCamera()
+        camera?.init(cameraTestSurfaceView.holder) { width, height ->
+            cameraWidth = width
+            cameraHeight = height
+        }
+        camera?.setPreviewCallback { buffer ->
+            if (isCapture) {
+                val copyBuffer = ByteArray(buffer.size)
+                buffer.copyInto(copyBuffer)
+                isCapture = false
+                executor.submit {
+                    rotateYUVClockwise90(copyBuffer,cameraWidth,cameraHeight)
+                    capture(copyBuffer)
                 }
-//                it.setPreviewCallback { data, camera ->
-//
-//                    if (isCapture) {
-//                        LogUtils.d("setPreviewCallback hash=${data.hashCode()}")
-//                        isCapture = false
-//                        capture(data)
-//                    }
-//                }
-                it.startPreview()
-            } catch (e: IOException) {
-                e.printStackTrace()
             }
         }
     }
     // </editor-fold>
-
-    // <editor-fold defaultstate="collapsed" desc="初始化工作线程">
-    private fun initCameraThread(cb: () -> Unit) {
-        cameraHandlerThread = object : HandlerThread("cameraHandlerThread") {
-            override fun onLooperPrepared() {
-                cameraHandler = Handler()
-                runOnUiThread {
-                    cb()
-                }
-            }
-        }
-        cameraHandlerThread?.start()
-    }
-    // </editor-fold>
-
-    // <editor-fold defaultstate="collapsed" desc="旋转yuv数据">
-    private fun rotateYUV(data: ByteArray) {
-        if (cameraHeight * cameraWidth <= 0) {
-            return
-        }
-
-        val source = ByteArray(data.size)
-        data.copyInto(source)
-        val dst = data
-
-        val oldW = cameraWidth
-        val oldH = cameraHeight
-
-        //first rotate Y , then rotate U and V
-
-        //Y分量的长度
-        val lengthY = oldW * oldH
-        //UV分量的高度
-        val heightUV = oldH / 2
-
-        var copyIndex = 0
-
-        //旋转Y
-        for (j in 0 until oldW) {
-            //j 是第几列
-            for (i in oldH - 1 downTo 0) {
-                //i 是第几行
-                dst[copyIndex++] = source[i * oldW + j]
-            }
-        }
-
-        //旋转U和V
-        for (j in 0 until oldW step 2) {
-            for (i in heightUV - 1 downTo 0) {
-                dst[copyIndex++] = source[lengthY + i * oldW + j]
-                dst[copyIndex++] = source[lengthY + i * oldW + j + 1]
-            }
-        }
-    }
-// </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="拍照并保存到本地">
     private fun captureOnce() {

@@ -6,9 +6,9 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.ToastUtils
-import com.hwilliamgo.fuzzy_video_drill.cameratest.CameraTestActivity
-import com.hwilliamgo.fuzzy_video_drill.screenprojection.ScreenProjectionPushActivity
-import com.hwilliamgo.fuzzy_video_drill.screenprojection.ScreenProjectionWatchActivity
+import com.hwilliamgo.fuzzy_video_drill.scene.cameratest.CameraTestActivity
+import com.hwilliamgo.fuzzy_video_drill.scene.screenprojection.ScreenProjectionPushActivity
+import com.hwilliamgo.fuzzy_video_drill.scene.screenprojection.ScreenProjectionWatchActivity
 
 class MainActivity : AppCompatActivity() {
     // <editor-fold defaultstate="collapsed" desc="变量">

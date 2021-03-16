@@ -1,4 +1,4 @@
-package com.hwilliamgo.fuzzy_video_drill.screenprojection
+package com.hwilliamgo.fuzzy_video_drill.scene.screenprojection
 
 import android.Manifest
 import android.content.Intent

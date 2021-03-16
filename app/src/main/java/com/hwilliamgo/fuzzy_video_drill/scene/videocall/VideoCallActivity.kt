@@ -1,4 +1,4 @@
-package com.hwilliamgo.fuzzy_video_drill.videocall
+package com.hwilliamgo.fuzzy_video_drill.scene.videocall
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
