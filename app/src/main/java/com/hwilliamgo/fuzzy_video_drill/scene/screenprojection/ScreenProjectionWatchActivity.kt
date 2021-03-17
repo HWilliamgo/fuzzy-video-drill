@@ -11,7 +11,7 @@ import android.view.SurfaceView
 import androidx.appcompat.app.AppCompatActivity
 import com.hwilliamgo.fuzzy_video_drill.R
 import com.hwilliamgo.fuzzy_video_drill.socket.ISocket
-import com.hwilliamgo.fuzzy_video_drill.socket.SocketFactory
+import com.hwilliamgo.fuzzy_video_drill.socket.ISocketFactory
 import java.io.IOException
 
 class ScreenProjectionWatchActivity : AppCompatActivity() {
@@ -90,7 +90,7 @@ class ScreenProjectionWatchActivity : AppCompatActivity() {
 
     // <editor-fold defaultstate="collapsed" desc="初始化socket">
     private fun initSocket() {
-        socketWatch = SocketFactory.createClientSocket(ipAddress, SERVER_PORT)
+        socketWatch = ISocketFactory.createClientSocket(ipAddress, SERVER_PORT)
         socketWatch?.init { data ->
             val codec = mediaCodec ?: return@init
             val index = codec.dequeueInputBuffer(10000)

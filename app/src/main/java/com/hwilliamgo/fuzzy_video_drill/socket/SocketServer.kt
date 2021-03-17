@@ -9,9 +9,9 @@ import java.net.InetSocketAddress
 /**
  * date: 2021/3/4
  * author: HWilliamgo
- * description:
+ * description:socket服务端
  */
-class SocketPush(private val port: Int) : ISocket {
+class SocketServer(private val port: Int) : ISocket {
     // <editor-fold defaultstate="collapsed" desc="变量">
     private var webSocket: WebSocket? = null
     private var onByteMessageListener: ISocket.OnByteMessageListener? = null

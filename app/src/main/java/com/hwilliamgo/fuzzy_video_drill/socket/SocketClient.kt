@@ -9,9 +9,9 @@ import java.nio.ByteBuffer
 /**
  * date: 2021/3/6
  * author: HWilliamgo
- * description:
+ * description:socket客户端
  */
-class SocketWatch(
+class SocketClient(
     private val ip: String,
     private val port: Int,
 ) : ISocket {
@@ -42,7 +42,7 @@ class SocketWatch(
                 bytes?.let {
                     val buf = ByteArray(it.remaining())
                     it.get(buf)
-                    this@SocketWatch.onByteMessageListener?.onMessage(buf)
+                    this@SocketClient.onByteMessageListener?.onMessage(buf)
                 }
             }
 
