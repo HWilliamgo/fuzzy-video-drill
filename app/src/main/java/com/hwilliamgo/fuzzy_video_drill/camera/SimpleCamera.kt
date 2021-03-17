@@ -10,7 +10,7 @@ import java.io.IOException
 /**
  * date: 2021/3/16
  * author: HWilliamgo
- * description:
+ * description: 相机实现，用的是Camera类
  */
 class SimpleCamera : ICamera {
     /**** Camera ****/

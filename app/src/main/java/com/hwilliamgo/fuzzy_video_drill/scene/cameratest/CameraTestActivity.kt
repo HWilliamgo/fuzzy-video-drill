@@ -13,8 +13,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.LogUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.hwilliamgo.fuzzy_video_drill.R
+import com.hwilliamgo.fuzzy_video_drill.camera.CameraFactory
+import com.hwilliamgo.fuzzy_video_drill.camera.CameraImplType
 import com.hwilliamgo.fuzzy_video_drill.camera.ICamera
-import com.hwilliamgo.fuzzy_video_drill.camera.SimpleCamera
 import com.hwilliamgo.fuzzy_video_drill.util.rotateYUVClockwise90
 import com.william.fastpermisssion.FastPermission
 import com.william.fastpermisssion.OnPermissionCallback
@@ -99,7 +100,7 @@ class CameraTestActivity : AppCompatActivity() {
 
     // <editor-fold defaultstate="collapsed" desc="初始化 - 相机">
     private fun startPreviewCamera() {
-        camera = SimpleCamera()
+        camera = CameraFactory.createCamera(CameraImplType.CAMERA_1)
         camera?.init(cameraTestSurfaceView.holder) { width, height ->
             cameraWidth = width
             cameraHeight = height
@@ -110,7 +111,7 @@ class CameraTestActivity : AppCompatActivity() {
                 buffer.copyInto(copyBuffer)
                 isCapture = false
                 executor.submit {
-                    rotateYUVClockwise90(copyBuffer,cameraWidth,cameraHeight)
+                    rotateYUVClockwise90(copyBuffer, cameraWidth, cameraHeight)
                     capture(copyBuffer)
                 }
             }
