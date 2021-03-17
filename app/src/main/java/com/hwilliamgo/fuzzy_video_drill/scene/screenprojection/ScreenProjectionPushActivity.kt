@@ -6,6 +6,8 @@ import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.hwilliamgo.fuzzy_video_drill.R
+import com.hwilliamgo.fuzzy_video_drill.socket.ISocket
+import com.hwilliamgo.fuzzy_video_drill.socket.SocketFactory
 import com.william.fastpermisssion.FastPermission
 import com.william.fastpermisssion.OnPermissionCallback
 import java.util.*
@@ -20,7 +22,7 @@ class ScreenProjectionPushActivity : AppCompatActivity() {
 
     // <editor-fold defaultstate="collapsed" desc="实例变量">
     private lateinit var mediaProjectionManager: MediaProjectionManager
-    private var socketPush: SocketPush? = null
+    private var socketPush: ISocket? = null
     private var codecLiveH265: CodecLiveH265? = null
     // </editor-fold>
 
@@ -59,7 +61,10 @@ class ScreenProjectionPushActivity : AppCompatActivity() {
     // <editor-fold defaultstate="collapsed" desc="允许投屏回调">
     private fun onAllowCaptureScreen(resultCode: Int, data: Intent) {
         val mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
-        socketPush = SocketPush(SERVER_PORT)
+        socketPush = SocketFactory.createServerSocket(SERVER_PORT)
+        socketPush?.init {
+
+        }
         codecLiveH265 = CodecLiveH265(socketPush!!, mediaProjection)
 
         socketPush?.start()

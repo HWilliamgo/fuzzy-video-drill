@@ -56,7 +56,12 @@ class SimpleCamera : ICamera {
     }
 
     override fun destroy() {
+        //release listener
+        onPreviewCallback = null
+        onCameraSizeReadyCallback = null
+        //release camera
         camera?.release()
+        //release thread
         cameraHandler?.removeCallbacksAndMessages(null)
         cameraHandlerThread?.quit()
     }

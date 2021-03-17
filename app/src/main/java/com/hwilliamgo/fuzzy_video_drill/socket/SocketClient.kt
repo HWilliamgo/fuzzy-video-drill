@@ -1,4 +1,4 @@
-package com.hwilliamgo.fuzzy_video_drill.scene.screenprojection
+package com.hwilliamgo.fuzzy_video_drill.socket
 
 import com.blankj.utilcode.util.LogUtils
 import org.java_websocket.client.WebSocketClient
@@ -14,12 +14,13 @@ import java.nio.ByteBuffer
 class SocketWatch(
     private val ip: String,
     private val port: Int,
-    private val callback: DataCallback
-) {
-
+) : ISocket {
     private var webSocketClient: WebSocketClient? = null
+    private var onByteMessageListener: ISocket.OnByteMessageListener? = null
 
-    fun start() {
+    override fun init(onByteMessageListener: ISocket.OnByteMessageListener) {
+        this.onByteMessageListener = onByteMessageListener
+
         val uri: URI
         try {
             uri = URI("ws://$ip:$port")
@@ -41,7 +42,7 @@ class SocketWatch(
                 bytes?.let {
                     val buf = ByteArray(it.remaining())
                     it.get(buf)
-                    callback.onCall(buf)
+                    this@SocketWatch.onByteMessageListener?.onMessage(buf)
                 }
             }
 
@@ -54,14 +55,23 @@ class SocketWatch(
                 LogUtils.e(ex)
             }
         }
+    }
+
+    override fun start() {
         webSocketClient?.connect()
     }
 
-    fun stop() {
+    override fun sendData(data: ByteArray) {
+        webSocketClient?.send(data)
+    }
+
+    override fun close() {
         webSocketClient?.close()
     }
 
-    fun interface DataCallback {
-        fun onCall(byteArray: ByteArray)
+    override fun destroy() {
+        close()
+        onByteMessageListener = null
+        webSocketClient = null
     }
 }

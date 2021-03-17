@@ -6,6 +6,7 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.projection.MediaProjection
+import com.hwilliamgo.fuzzy_video_drill.socket.ISocket
 import java.nio.ByteBuffer
 import kotlin.concurrent.thread
 
@@ -15,7 +16,7 @@ import kotlin.concurrent.thread
  * description:
  */
 class CodecLiveH265(
-    private val socketPush: SocketPush,
+    private val socketPush: ISocket,
     private val mediaProjection: MediaProjection
 ) {
     companion object {

@@ -10,6 +10,8 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.appcompat.app.AppCompatActivity
 import com.hwilliamgo.fuzzy_video_drill.R
+import com.hwilliamgo.fuzzy_video_drill.socket.ISocket
+import com.hwilliamgo.fuzzy_video_drill.socket.SocketFactory
 import java.io.IOException
 
 class ScreenProjectionWatchActivity : AppCompatActivity() {
@@ -29,7 +31,7 @@ class ScreenProjectionWatchActivity : AppCompatActivity() {
     private lateinit var surfaceView: SurfaceView
     private var surface: Surface? = null
 
-    private var socketWatch: SocketWatch? = null
+    private var socketWatch: ISocket? = null
     private var mediaCodec: MediaCodec? = null
 
     private var ipAddress: String = ""
@@ -54,7 +56,7 @@ class ScreenProjectionWatchActivity : AppCompatActivity() {
         mediaCodec?.release()
         mediaCodec = null
 
-        socketWatch?.stop()
+        socketWatch?.close()
     }
 // </editor-fold>
 
@@ -88,8 +90,9 @@ class ScreenProjectionWatchActivity : AppCompatActivity() {
 
     // <editor-fold defaultstate="collapsed" desc="初始化socket">
     private fun initSocket() {
-        socketWatch = SocketWatch(ipAddress, SERVER_PORT) { data ->
-            val codec = mediaCodec ?: return@SocketWatch
+        socketWatch = SocketFactory.createClientSocket(ipAddress, SERVER_PORT)
+        socketWatch?.init { data ->
+            val codec = mediaCodec ?: return@init
             val index = codec.dequeueInputBuffer(10000)
             if (index >= 0) {
                 val inputBuffer = codec.getInputBuffer(index)
