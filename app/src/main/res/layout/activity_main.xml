@@ -41,6 +41,30 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:text="跳转到 camera test" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btn_video_call_server"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="视频通话Server端" />
+
+            <Button
+                android:id="@+id/btn_video_call_client"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="视频通话Client端" />
+
+            <EditText
+                android:id="@+id/et_server_ip_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="server端ip地址" />
+        </LinearLayout>
+
     </LinearLayout>
 
 

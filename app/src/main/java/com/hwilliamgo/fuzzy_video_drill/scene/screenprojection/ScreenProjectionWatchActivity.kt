@@ -90,7 +90,7 @@ class ScreenProjectionWatchActivity : AppCompatActivity() {
 
     // <editor-fold defaultstate="collapsed" desc="初始化socket">
     private fun initSocket() {
-        socketWatch = ISocketFactory.createClientSocket(ipAddress, SERVER_PORT)
+        socketWatch = ISocketFactory.createClientSocket(ipAddress, MEDIA_PROJECTION_SERVER_PORT)
         socketWatch?.init { data ->
             val codec = mediaCodec ?: return@init
             val index = codec.dequeueInputBuffer(10000)

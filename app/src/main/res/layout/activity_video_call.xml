@@ -6,4 +6,27 @@
     android:layout_height="match_parent"
     tools:context=".scene.videocall.VideoCallActivity">
 
+    <com.hwilliamgo.fuzzy_video_drill.scene.videocall.RemoteStreamSurfaceView
+        android:id="@+id/remote_surface_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.hwilliamgo.fuzzy_video_drill.scene.videocall.LocalCameraSurfaceView
+        android:id="@+id/local_camera_surface_view"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_margin="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/btn_start_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="开始连接"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

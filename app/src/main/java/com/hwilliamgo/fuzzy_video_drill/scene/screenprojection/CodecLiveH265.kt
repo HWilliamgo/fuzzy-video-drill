@@ -35,6 +35,7 @@ class CodecLiveH265(
     @Volatile
     private var isRunning = false
 
+    // <editor-fold defaultstate="collapsed" desc="API">
     fun startLive() {
         //create format
         val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_HEVC, width, height)
@@ -92,6 +93,7 @@ class CodecLiveH265(
     fun stopLive() {
         isRunning = false
     }
+    // </editor-fold>
 
     private fun dealFrame(bb: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
         //如果是00 00 00 01，那么是偏移到第4个元素来取出nalu type。

@@ -61,7 +61,7 @@ class ScreenProjectionPushActivity : AppCompatActivity() {
     // <editor-fold defaultstate="collapsed" desc="允许投屏回调">
     private fun onAllowCaptureScreen(resultCode: Int, data: Intent) {
         val mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
-        socketPush = ISocketFactory.createServerSocket(SERVER_PORT)
+        socketPush = ISocketFactory.createServerSocket(MEDIA_PROJECTION_SERVER_PORT)
         socketPush?.init {
 
         }

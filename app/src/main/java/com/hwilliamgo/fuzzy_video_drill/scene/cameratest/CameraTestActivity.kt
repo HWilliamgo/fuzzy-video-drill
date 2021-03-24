@@ -16,7 +16,7 @@ import com.hwilliamgo.fuzzy_video_drill.R
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraFactory
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraImplType
 import com.hwilliamgo.fuzzy_video_drill.camera.ICamera
-import com.hwilliamgo.fuzzy_video_drill.util.rotateYUVClockwise90
+import com.hwilliamgo.fuzzy_video_drill.util.YuvUtils
 import com.william.fastpermisssion.FastPermission
 import com.william.fastpermisssion.OnPermissionCallback
 import java.io.File
@@ -111,7 +111,7 @@ class CameraTestActivity : AppCompatActivity() {
                 buffer.copyInto(copyBuffer)
                 isCapture = false
                 executor.submit {
-                    rotateYUVClockwise90(copyBuffer, cameraWidth, cameraHeight)
+                    YuvUtils.rotateYUVClockwise90(copyBuffer, cameraWidth, cameraHeight)
                     capture(copyBuffer)
                 }
             }
