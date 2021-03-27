@@ -6,6 +6,7 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.projection.MediaProjection
+import com.blankj.utilcode.util.LogUtils
 import com.hwilliamgo.fuzzy_video_drill.socket.ISocket
 import java.nio.ByteBuffer
 import kotlin.concurrent.thread
@@ -105,6 +106,7 @@ class CodecLiveH265(
         }
 
         val type = (bb.get(offset).toInt() and 0x7E) ushr 1
+        LogUtils.d("nalueType=$type")
         when (type) {
             NAL_VPS -> {
                 vps_sps_pps_buffer = ByteArray(bufferInfo.size)

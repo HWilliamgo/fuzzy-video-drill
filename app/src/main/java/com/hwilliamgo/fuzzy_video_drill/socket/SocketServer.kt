@@ -35,6 +35,7 @@ class SocketServer(private val port: Int) : ISocket {
 
             override fun onError(conn: WebSocket?, ex: Exception?) {
                 LogUtils.d("SocketPush.onError")
+                ex?.printStackTrace()
             }
 
             override fun onStart() {

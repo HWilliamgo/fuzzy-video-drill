@@ -30,15 +30,15 @@ class SocketClient(
         }
         webSocketClient = object : WebSocketClient(uri) {
             override fun onOpen(handshakedata: ServerHandshake?) {
-                LogUtils.d("SocketWatch.onOpen")
+                LogUtils.d("SocketClient.onOpen")
             }
 
             override fun onMessage(message: String?) {
-                LogUtils.d("SocketWatch.onMessage")
+                LogUtils.d("SocketClient.onMessage")
             }
 
             override fun onMessage(bytes: ByteBuffer?) {
-                LogUtils.d("SocketWatch.onMessage->bytes length=${bytes?.remaining()}")
+                LogUtils.d("SocketClient.onMessage->bytes length=${bytes?.remaining()}")
                 bytes?.let {
                     val buf = ByteArray(it.remaining())
                     it.get(buf)
@@ -47,11 +47,11 @@ class SocketClient(
             }
 
             override fun onClose(code: Int, reason: String?, remote: Boolean) {
-                LogUtils.d("SocketWatch.onClose $code, $reason, $remote")
+                LogUtils.d("SocketClient.onClose $code, $reason, $remote")
             }
 
             override fun onError(ex: java.lang.Exception?) {
-                LogUtils.d("SocketWatch.onError")
+                LogUtils.d("SocketClient.onError")
                 LogUtils.e(ex)
             }
         }

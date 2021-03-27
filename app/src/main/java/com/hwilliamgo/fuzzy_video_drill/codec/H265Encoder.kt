@@ -4,6 +4,8 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.util.Log
+import com.blankj.utilcode.util.LogUtils
+import com.hwilliamgo.fuzzy_video_drill.util.FastFileWriter
 import java.nio.ByteBuffer
 
 /**
@@ -30,6 +32,8 @@ class H265Encoder : IEncoder {
     /**** buffer ****/
     private var vpsSpsPpsBuffer: ByteArray? = null
 
+    private var fastFileWriter: FastFileWriter? = null
+
     override fun init(
         width: Int,
         height: Int,
@@ -39,6 +43,7 @@ class H265Encoder : IEncoder {
         this.height = height
         this.onEncodeDataCallback = onEncodeDataCallback
         configureCodec()
+        fastFileWriter = FastFileWriter("encoderh265.h265")
     }
 
     override fun start() {
@@ -51,22 +56,31 @@ class H265Encoder : IEncoder {
     }
 
     override fun encodeFrame(frameData: ByteArray) {
-        val codec = mediaCodec ?: return
-        val inputBufferIndex = codec.dequeueInputBuffer(100000)
-        if (inputBufferIndex >= 0) {
-            val inputBuffer = codec.getInputBuffer(inputBufferIndex) ?: return
-            inputBuffer.clear()
-            inputBuffer.put(frameData)
-            val pts = computePresentationTime(frameIndex++)
-            codec.queueInputBuffer(inputBufferIndex, 0, inputBuffer.remaining(), pts, 0)
-        }
-        val bufferInfo = MediaCodec.BufferInfo()
-        var outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 100000)
-        while (outputBufferIndex > 0) {
-            val outputBuffer = codec.getOutputBuffer(outputBufferIndex) ?: continue
-            dealFrame(outputBuffer, bufferInfo)
-            codec.releaseOutputBuffer(outputBufferIndex, false)
-            outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 100000)
+        try {
+            val codec = mediaCodec ?: return
+            val inputBufferIndex = codec.dequeueInputBuffer(100000)
+            if (inputBufferIndex >= 0) {
+                val inputBuffer = codec.getInputBuffer(inputBufferIndex) ?: return
+                inputBuffer.clear()
+                if (inputBufferIndex == 0) {
+                    val remaining = inputBuffer.remaining()
+                    val capacity = inputBuffer.capacity()
+                    LogUtils.d("remaining=$remaining, capacity=$capacity, frameData.size=${frameData.size}")
+                }
+                inputBuffer.put(frameData)
+                val pts = computePresentationTime(frameIndex++)
+                codec.queueInputBuffer(inputBufferIndex, 0, inputBuffer.remaining(), pts, 0)
+            }
+            val bufferInfo = MediaCodec.BufferInfo()
+            var outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 100000)
+            while (outputBufferIndex >= 0) {
+                val outputBuffer = codec.getOutputBuffer(outputBufferIndex) ?: continue
+                dealFrame(outputBuffer, bufferInfo)
+                codec.releaseOutputBuffer(outputBufferIndex, false)
+                outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 0)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -79,6 +93,7 @@ class H265Encoder : IEncoder {
     }
 
     override fun destroy() {
+        fastFileWriter?.destroy()
         try {
             mediaCodec?.release()
         } catch (e: Exception) {
@@ -97,9 +112,11 @@ class H265Encoder : IEncoder {
                     MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible
                 )
                 setInteger(MediaFormat.KEY_BIT_RATE, width * height)
-                setInteger(MediaFormat.KEY_FRAME_RATE, 15)
-                setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
-                setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5) //IDR帧刷新时间
+                setInteger(MediaFormat.KEY_FRAME_RATE, CodecConstant.FRAME_RATE)
+                setInteger(
+                    MediaFormat.KEY_I_FRAME_INTERVAL,
+                    CodecConstant.I_FRAME_INTERVAL
+                ) //IDR帧刷新时间
             }
             mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_HEVC);
             mediaCodec?.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
@@ -113,6 +130,7 @@ class H265Encoder : IEncoder {
     }
 
     private fun dealFrame(bb: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
+
         //如果是00 00 00 01，那么是偏移到第4个元素来取出nalu type。
         //如果是00 00 01，   那么是偏移到第3个元素来取出nalu type。
         val offset: Int = if (bb.get(2).toInt() == 0x01) {
@@ -122,7 +140,7 @@ class H265Encoder : IEncoder {
         }
 
         val naluType = (bb.get(offset).toInt() and 0x7E) ushr 1
-        Log.d(TAG, "naluType")
+        Log.d(TAG, "naluType=$naluType")
         when (naluType) {
             CodecConstant.HEVC_NALU_TYPE_VPS -> {
                 vpsSpsPpsBuffer = ByteArray(bufferInfo.size)
@@ -136,11 +154,13 @@ class H265Encoder : IEncoder {
                 System.arraycopy(vpsSpsPpsBufferTmp, 0, newBuf, 0, vpsSpsPpsBufferTmp.size)
                 System.arraycopy(bytes, 0, newBuf, vpsSpsPpsBufferTmp.size, bytes.size)
                 onEncodeDataCallback?.onEncodeData(newBuf)
+                fastFileWriter?.writeData2File(newBuf)
             }
             else -> {
                 val bytes = ByteArray(bufferInfo.size)
                 bb.get(bytes)
                 onEncodeDataCallback?.onEncodeData(bytes)
+                fastFileWriter?.writeData2File(bytes)
             }
         }
     }
