@@ -3,15 +3,10 @@ package com.hwilliamgo.fuzzy_video_drill.codec
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
-import android.os.Environment
 import android.view.Surface
 import com.blankj.utilcode.util.LogUtils
-import com.hwilliamgo.fuzzy_video_drill.util.FastFileWriter
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.nio.ByteBuffer
-import java.util.concurrent.Executors
+import com.hwilliamgo.fuzzy_video_drill.util.file.FastFileWriter
+import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
 
 /**
  * date: 3/23/21
@@ -24,7 +19,7 @@ class H265Decoder : IDecoder {
     private var mediaCodec: MediaCodec? = null
 
     private var mediaFormat: MediaFormat? = null
-    private var fastFileWriter:FastFileWriter?=null
+    private var fastFileWriter: IFileWriter?=null
 
     override fun init(width: Int, height: Int) {
         LogUtils.d("init->width=$width, height=$height")

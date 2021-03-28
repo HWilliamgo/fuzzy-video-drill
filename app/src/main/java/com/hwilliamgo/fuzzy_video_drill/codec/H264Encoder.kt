@@ -4,19 +4,20 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.util.Log
+import com.blankj.utilcode.util.LogUtils
 import com.hwilliamgo.fuzzy_video_drill.util.file.FastFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.file.HexStringFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
 import java.nio.ByteBuffer
 
 /**
- * date: 3/22/21
+ * date: 3/28/21
  * author: HWilliamgo
  * description:
  */
-class H265Encoder : IEncoder {
+class H264Encoder : IEncoder {
     companion object {
-        val TAG = H265Encoder::class.java.simpleName
+        val TAG = H264Encoder::class.java.simpleName
     }
 
     /**** 元数据 ****/
@@ -30,8 +31,7 @@ class H265Encoder : IEncoder {
     /**** codec ****/
     private var mediaCodec: MediaCodec? = null
 
-    /**** buffer ****/
-    private var vpsSpsPpsBuffer: ByteArray? = null
+    private var spsPpsBuffer: ByteArray? = null
 
     private var fastFileWriter: IFileWriter? = null
     private var hexStringFileWriter: IFileWriter? = null
@@ -45,8 +45,8 @@ class H265Encoder : IEncoder {
         this.height = height
         this.onEncodeDataCallback = onEncodeDataCallback
         configureCodec()
-        fastFileWriter = FastFileWriter("encoderh265.h265")
-        hexStringFileWriter = HexStringFileWriter("encoderh265HexString.txt")
+        fastFileWriter = FastFileWriter("encoder_avc.h264")
+        hexStringFileWriter = HexStringFileWriter("encoder_avcHexString.txt")
     }
 
     override fun start() {
@@ -68,6 +68,12 @@ class H265Encoder : IEncoder {
                 //经过测试，frameData大小为3.1M, remaining 为3.6M，不会超出的inputBuffer的大小，其实超出了也会在put方法报异常：BufferOverflowException
                 inputBuffer.put(frameData)
                 val pts = computePresentationTime(frameIndex++)
+                val remaining = inputBuffer.remaining()
+                val frameDataSize = frameData.size
+                //remaing < frameDataSize
+                LogUtils.d("remaining=$remaining, frameDataSize=$frameDataSize")
+                // TODO: 3/29/21 这里为什么remaining和 frameDataSize不相等？是ByteBuffer模式不对吗？在使用前要调用某个方法吗？
+                //如果用 inputBuffer.remaining() 则发生绿屏，如果用frameDataSize则正常。
                 codec.queueInputBuffer(inputBufferIndex, 0, inputBuffer.remaining(), pts, 0)
             }
             val bufferInfo = MediaCodec.BufferInfo()
@@ -76,6 +82,7 @@ class H265Encoder : IEncoder {
                 val outputBuffer = codec.getOutputBuffer(outputBufferIndex) ?: continue
                 dealFrame(outputBuffer, bufferInfo)
                 codec.releaseOutputBuffer(outputBufferIndex, false)
+                // TODO: 3/28/21 timeoutUs如果设置成0则编码输出nalu的速度非常快，设置成100000则会比较慢，哪种比较好？
                 outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 0)
             }
         } catch (e: Exception) {
@@ -105,7 +112,7 @@ class H265Encoder : IEncoder {
     private fun configureCodec() {
         try {
             val format =
-                MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_HEVC, width, height)
+                MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height)
             format.apply {
                 setInteger(
                     MediaFormat.KEY_COLOR_FORMAT,
@@ -118,7 +125,7 @@ class H265Encoder : IEncoder {
                     CodecConstant.I_FRAME_INTERVAL
                 ) //IDR帧刷新时间
             }
-            mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_HEVC);
+            mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);
             mediaCodec?.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -140,18 +147,17 @@ class H265Encoder : IEncoder {
             4
         }
 
-        val naluType = (bb.get(offset).toInt() and 0x7E) shr 1
+        val naluType = bb.get(offset).toInt() and 0x1F
         Log.d(TAG, "naluType=$naluType")
         when (naluType) {
-            CodecConstant.HEVC_NALU_TYPE_VPS -> {
-                vpsSpsPpsBuffer = ByteArray(bufferInfo.size)
-                bb.get(vpsSpsPpsBuffer)
-                hexStringFileWriter?.writeData2File(vpsSpsPpsBuffer ?: return)
+            CodecConstant.AVC_NALU_TYPE_SPS -> {
+                spsPpsBuffer = ByteArray(bufferInfo.size)
+                bb.get(spsPpsBuffer)
             }
-            CodecConstant.HEVC_NALU_TYPE_I -> {
+            CodecConstant.AVC_NALU_TYPE_I -> {
                 val bytes = ByteArray(bufferInfo.size)
                 bb.get(bytes)
-                val vpsSpsPpsBufferTmp = vpsSpsPpsBuffer!!
+                val vpsSpsPpsBufferTmp = spsPpsBuffer!!
                 val newBuf = ByteArray(vpsSpsPpsBufferTmp.size + bytes.size)
                 System.arraycopy(vpsSpsPpsBufferTmp, 0, newBuf, 0, vpsSpsPpsBufferTmp.size)
                 System.arraycopy(bytes, 0, newBuf, vpsSpsPpsBufferTmp.size, bytes.size)

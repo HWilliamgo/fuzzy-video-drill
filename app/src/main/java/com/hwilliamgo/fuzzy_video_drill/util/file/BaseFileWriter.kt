@@ -1,25 +1,22 @@
-package com.hwilliamgo.fuzzy_video_drill.util
+package com.hwilliamgo.fuzzy_video_drill.util.file
 
 import android.os.Environment
 import com.blankj.utilcode.util.LogUtils
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
 /**
- * date: 3/27/21
+ * date: 3/28/21
  * author: HWilliamgo
- * description: 快捷文件输出器，写在SD卡根目录下
+ * description:包含一个FileOutputStream和一个单线程线程池，用于写入文件
  */
-class FastFileWriter(outputFileName: String) {
-
-    private var fos: FileOutputStream? = null
-    private val fosThread = Executors.newSingleThreadExecutor()
+abstract class BaseFileWriter(outputFileName: String) : IFileWriter {
+    protected var fos: FileOutputStream? = null
+    protected val fosThread = Executors.newSingleThreadExecutor()
 
     init {
-        //create h265 file writer
         val sdRoot = Environment.getExternalStorageDirectory()
         val pictureFile = File(sdRoot, outputFileName)
 
@@ -37,19 +34,7 @@ class FastFileWriter(outputFileName: String) {
         }
     }
 
-    fun writeData2File(data: ByteArray) {
-        if (!fosThread.isShutdown) {
-            fosThread.submit {
-                try {
-                    fos?.channel?.write(ByteBuffer.wrap(data))
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
-    fun destroy() {
+    override fun destroy() {
         try {
             fos?.close()
         } catch (e: IOException) {

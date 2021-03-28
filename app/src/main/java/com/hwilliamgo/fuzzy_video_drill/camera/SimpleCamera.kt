@@ -44,11 +44,12 @@ class SimpleCamera : ICamera {
             override fun onLooperPrepared() {
                 cameraHandler = Handler()
                 cameraHandler?.post {
-                    startPreviewCamera()
+
                 }
             }
         }
         cameraHandlerThread?.start()
+        startPreviewCamera()
     }
 
     override fun setPreviewCallback(callback: ICamera.PreviewCallback) {
@@ -70,6 +71,19 @@ class SimpleCamera : ICamera {
         camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK)
         camera?.let {
             val parameters = it.parameters
+            val frameRate = parameters.previewFrameRate
+            val frameRateRange = IntArray(2)
+            parameters.getPreviewFpsRange(frameRateRange)
+            val minFrameRate = frameRateRange[0]
+            val maxFrameRate = frameRateRange[1]
+            LogUtils.d("frameRate=$frameRate, minFrameRate=$minFrameRate, maxFrameRate=$maxFrameRate")
+
+            for (previewSize in camera!!.parameters.supportedPreviewSizes) {
+                LogUtils.d("${previewSize.width}, ${previewSize.height}")
+            }
+            parameters.setPreviewSize(1920, 1080)
+            it.parameters=parameters
+
             cameraWidth = parameters.previewSize.width
             cameraHeight = parameters.previewSize.height
             onCameraSizeReadyCallback?.onCameraSizeReady(cameraWidth, cameraHeight)

@@ -1,9 +1,6 @@
 package com.hwilliamgo.fuzzy_video_drill.scene.videocall
 
 import android.content.Context
-import android.graphics.ImageFormat
-import android.graphics.Rect
-import android.graphics.YuvImage
 import android.os.Environment
 import android.util.AttributeSet
 import android.view.SurfaceHolder
@@ -16,7 +13,7 @@ import com.blankj.utilcode.util.ToastUtils
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraFactory
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraImplType
 import com.hwilliamgo.fuzzy_video_drill.camera.ICamera
-import com.hwilliamgo.fuzzy_video_drill.codec.H265Encoder
+import com.hwilliamgo.fuzzy_video_drill.codec.H264Encoder
 import com.hwilliamgo.fuzzy_video_drill.codec.IEncoder
 import com.hwilliamgo.fuzzy_video_drill.util.YuvUtils
 import com.hwilliamgo.fuzzy_video_drill.videowidget.ILocalCameraSurfaceView
@@ -100,7 +97,7 @@ class LocalCameraSurfaceView @JvmOverloads constructor(
                 setOnClickListener {
                     isCapture = true
                 }
-            },ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+            }, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
     // </editor-fold>
 
@@ -108,19 +105,18 @@ class LocalCameraSurfaceView @JvmOverloads constructor(
     private fun initCamera() {
         camera = CameraFactory.createCamera(CameraImplType.CAMERA_1)
         camera?.setPreviewCallback { data ->
+            // TODO: 3/28/21 是否有必要为了防止缓冲数据在相机中写入与外部读取时机重叠引起异常，再copy到另一个byte array中？
             val buffer = ByteArray(data.size)
             data.copyInto(buffer)
-//            cameraPreviewThreadPool.submit {
-
-//                encoderThreadPoolExecutor.submit {
-            YuvUtils.rotateYUVClockwise90(data, cameraWidth, cameraHeight)
-            val nv12 = YuvUtils.nv21toNV12(data)
-            encoder?.encodeFrame(nv12)
-            if (isCapture) {
-                isCapture = false
-                saveYuv(nv12)
-            }
-//                }
+            // TODO: 3/29/21 使用线程池的话，如果还用buffer会引起buffer OOM, 因为buffer大量创建并被放到单线程的任务队列中的大量任务引用了，无法及时释放。
+//            encoderThreadPoolExecutor.submit {
+                YuvUtils.rotateYUVClockwise90(data, cameraWidth, cameraHeight)
+                val nv12 = YuvUtils.nv21toNV12(data)
+                encoder?.encodeFrame(nv12)
+                if (isCapture) {
+                    isCapture = false
+                    saveYuv(nv12)
+                }
 //            }
         }
     }
@@ -151,7 +147,7 @@ class LocalCameraSurfaceView @JvmOverloads constructor(
 
     // <editor-fold defaultstate="collapsed" desc="初始化编码器">
     private fun initEncoder() {
-        encoder = H265Encoder()
+        encoder = H264Encoder()
         encoder?.init(cameraHeight, cameraWidth) { encodedFrame ->
             onCameraFrameEncodedCallback?.onCameraPreviewFrameEncoded(encodedFrame)
         }

@@ -9,6 +9,11 @@ object CodecConstant {
     const val HEVC_NALU_TYPE_I = 19
     const val HEVC_NALU_TYPE_VPS = 32
 
-    const val FRAME_RATE = 15
+    const val AVC_NALU_TYPE_I = 5
+    const val AVC_NALU_TYPE_SPS = 7
+    const val AVC_NALU_TYPE_pps = 8
+
+
+    const val FRAME_RATE = 30
     const val I_FRAME_INTERVAL = 2
 }
