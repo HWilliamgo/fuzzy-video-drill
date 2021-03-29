@@ -12,7 +12,7 @@ import java.nio.ByteBuffer
 /**
  * date: 3/22/21
  * author: HWilliamgo
- * description:
+ * description: h265编码器
  */
 class H265Encoder : IEncoder {
     companion object {
@@ -45,8 +45,18 @@ class H265Encoder : IEncoder {
         this.height = height
         this.onEncodeDataCallback = onEncodeDataCallback
         configureCodec()
-        fastFileWriter = FastFileWriter("encoderh265.h265")
-        hexStringFileWriter = HexStringFileWriter("encoderh265HexString.txt")
+    }
+
+    override fun enableOutputRawEncodeStream(enable: Boolean) {
+        if (enable) {
+            fastFileWriter = FastFileWriter("encoderh265.h265")
+        }
+    }
+
+    override fun enableOutputHexStreamData(enable: Boolean) {
+        if (enable) {
+            hexStringFileWriter = HexStringFileWriter("encoderh265HexString.txt")
+        }
     }
 
     override fun start() {
@@ -68,7 +78,7 @@ class H265Encoder : IEncoder {
                 //经过测试，frameData大小为3.1M, remaining 为3.6M，不会超出的inputBuffer的大小，其实超出了也会在put方法报异常：BufferOverflowException
                 inputBuffer.put(frameData)
                 val pts = computePresentationTime(frameIndex++)
-                codec.queueInputBuffer(inputBufferIndex, 0, inputBuffer.remaining(), pts, 0)
+                codec.queueInputBuffer(inputBufferIndex, 0, frameData.size, pts, 0)
             }
             val bufferInfo = MediaCodec.BufferInfo()
             var outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 100000)
@@ -76,7 +86,8 @@ class H265Encoder : IEncoder {
                 val outputBuffer = codec.getOutputBuffer(outputBufferIndex) ?: continue
                 dealFrame(outputBuffer, bufferInfo)
                 codec.releaseOutputBuffer(outputBufferIndex, false)
-                outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 0)
+                //用0的话会导致画面很慢，延迟很高；用10000的话，画面延迟低，但是画面感觉掉帧
+                outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 100000)
             }
         } catch (e: Exception) {
             e.printStackTrace()

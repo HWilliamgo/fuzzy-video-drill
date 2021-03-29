@@ -13,7 +13,7 @@ import java.nio.ByteBuffer
 /**
  * date: 3/28/21
  * author: HWilliamgo
- * description:
+ * description: h264编码器
  */
 class H264Encoder : IEncoder {
     companion object {
@@ -45,8 +45,18 @@ class H264Encoder : IEncoder {
         this.height = height
         this.onEncodeDataCallback = onEncodeDataCallback
         configureCodec()
-        fastFileWriter = FastFileWriter("encoder_avc.h264")
-        hexStringFileWriter = HexStringFileWriter("encoder_avcHexString.txt")
+    }
+
+    override fun enableOutputRawEncodeStream(enable: Boolean) {
+        if (enable) {
+            fastFileWriter = FastFileWriter("encoder_avc.h264")
+        }
+    }
+
+    override fun enableOutputHexStreamData(enable: Boolean) {
+        if (enable) {
+            hexStringFileWriter = HexStringFileWriter("encoder_avcHexString.txt")
+        }
     }
 
     override fun start() {
@@ -72,9 +82,8 @@ class H264Encoder : IEncoder {
                 val frameDataSize = frameData.size
                 //remaing < frameDataSize
                 LogUtils.d("remaining=$remaining, frameDataSize=$frameDataSize")
-                // TODO: 3/29/21 这里为什么remaining和 frameDataSize不相等？是ByteBuffer模式不对吗？在使用前要调用某个方法吗？
                 //如果用 inputBuffer.remaining() 则发生绿屏，如果用frameDataSize则正常。
-                codec.queueInputBuffer(inputBufferIndex, 0, inputBuffer.remaining(), pts, 0)
+                codec.queueInputBuffer(inputBufferIndex, 0, frameDataSize, pts, 0)
             }
             val bufferInfo = MediaCodec.BufferInfo()
             var outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 100000)

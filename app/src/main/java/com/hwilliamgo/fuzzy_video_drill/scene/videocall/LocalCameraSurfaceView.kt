@@ -13,7 +13,7 @@ import com.blankj.utilcode.util.ToastUtils
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraFactory
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraImplType
 import com.hwilliamgo.fuzzy_video_drill.camera.ICamera
-import com.hwilliamgo.fuzzy_video_drill.codec.H264Encoder
+import com.hwilliamgo.fuzzy_video_drill.codec.H265Encoder
 import com.hwilliamgo.fuzzy_video_drill.codec.IEncoder
 import com.hwilliamgo.fuzzy_video_drill.util.YuvUtils
 import com.hwilliamgo.fuzzy_video_drill.videowidget.ILocalCameraSurfaceView
@@ -110,13 +110,13 @@ class LocalCameraSurfaceView @JvmOverloads constructor(
             data.copyInto(buffer)
             // TODO: 3/29/21 使用线程池的话，如果还用buffer会引起buffer OOM, 因为buffer大量创建并被放到单线程的任务队列中的大量任务引用了，无法及时释放。
 //            encoderThreadPoolExecutor.submit {
-                YuvUtils.rotateYUVClockwise90(data, cameraWidth, cameraHeight)
-                val nv12 = YuvUtils.nv21toNV12(data)
-                encoder?.encodeFrame(nv12)
-                if (isCapture) {
-                    isCapture = false
-                    saveYuv(nv12)
-                }
+            YuvUtils.rotateYUVClockwise90(data, cameraWidth, cameraHeight)
+            val nv12 = YuvUtils.nv21toNV12(data)
+            encoder?.encodeFrame(nv12)
+            if (isCapture) {
+                isCapture = false
+                saveYuv(nv12)
+            }
 //            }
         }
     }
@@ -147,10 +147,12 @@ class LocalCameraSurfaceView @JvmOverloads constructor(
 
     // <editor-fold defaultstate="collapsed" desc="初始化编码器">
     private fun initEncoder() {
-        encoder = H264Encoder()
+        encoder = H265Encoder()
         encoder?.init(cameraHeight, cameraWidth) { encodedFrame ->
             onCameraFrameEncodedCallback?.onCameraPreviewFrameEncoded(encodedFrame)
         }
+        encoder?.enableOutputHexStreamData(false)
+        encoder?.enableOutputRawEncodeStream(false)
         encoder?.start()
     }
     // </editor-fold>

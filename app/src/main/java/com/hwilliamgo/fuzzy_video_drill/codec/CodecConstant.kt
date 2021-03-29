@@ -14,6 +14,6 @@ object CodecConstant {
     const val AVC_NALU_TYPE_pps = 8
 
 
-    const val FRAME_RATE = 30
+    const val FRAME_RATE = 15
     const val I_FRAME_INTERVAL = 2
 }
