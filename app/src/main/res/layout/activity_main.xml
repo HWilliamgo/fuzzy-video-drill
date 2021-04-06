@@ -65,6 +65,13 @@
                 android:hint="server端ip地址" />
         </LinearLayout>
 
+        <Button
+            android:id="@+id/btn_jump_to_music_clip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="音频剪裁" />
+
     </LinearLayout>
 
 

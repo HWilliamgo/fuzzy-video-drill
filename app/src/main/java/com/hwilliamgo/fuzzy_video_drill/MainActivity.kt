@@ -8,6 +8,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.ToastUtils
 import com.hwilliamgo.fuzzy_video_drill.scene.cameratest.CameraTestActivity
+import com.hwilliamgo.fuzzy_video_drill.scene.musicclip.MusicClipActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.screenprojection.ScreenProjectionPushActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.screenprojection.ScreenProjectionWatchActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.videocall.VideoCallActivity
@@ -16,15 +17,17 @@ import com.william.fastpermisssion.OnPermissionCallback
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
-    // <editor-fold defaultstate="collapsed" desc="变量">
-    private lateinit var btnToScreenProjectionPush: Button
-    private lateinit var btnToScreenProjectionWatch: Button
-    private lateinit var etPushServerIpAddress: EditText
-    private lateinit var btnJumpToCameraTest: Button
-    private lateinit var btnVideoCallServer: Button
-    private lateinit var btnVideoCallClient: Button
-    private lateinit var etServerIpAddress: EditText
 
+
+    // <editor-fold defaultstate="collapsed" desc="变量">
+    private val btnToScreenProjectionPush: Button by lazy { findViewById<Button>(R.id.btn_to_screen_projection_push) }
+    private val btnToScreenProjectionWatch: Button by lazy { findViewById<Button>(R.id.btn_to_screen_projection_watch) }
+    private val etPushServerIpAddress: EditText by lazy { findViewById<EditText>(R.id.et_push_server_ip_address) }
+    private val btnJumpToCameraTest: Button by lazy { findViewById<Button>(R.id.btn_jump_to_camera_test) }
+    private val btnVideoCallServer: Button by lazy { findViewById<Button>(R.id.btn_video_call_server) }
+    private val btnVideoCallClient: Button by lazy { findViewById<Button>(R.id.btn_video_call_client) }
+    private val etServerIpAddress: EditText by lazy { findViewById<EditText>(R.id.et_server_ip_address) }
+    private val btnJumpToMusicClip: Button by lazy { findViewById<Button>(R.id.btn_jump_to_music_clip) }
 
     // </editor-fold>
 
@@ -34,21 +37,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-        findView()
         initView()
     }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="初始化View">
-    private fun findView() {
-        btnToScreenProjectionPush = findViewById(R.id.btn_to_screen_projection_push)
-        btnToScreenProjectionWatch = findViewById(R.id.btn_to_screen_projection_watch)
-        etPushServerIpAddress = findViewById(R.id.et_push_server_ip_address)
-        btnJumpToCameraTest = findViewById(R.id.btn_jump_to_camera_test)
-        btnVideoCallServer = findViewById<Button>(R.id.btn_video_call_server)
-        btnVideoCallClient = findViewById<Button>(R.id.btn_video_call_client)
-        etServerIpAddress = findViewById<EditText>(R.id.et_server_ip_address)
-    }
 
     private fun initView() {
         btnToScreenProjectionPush.setOnClickListener {
@@ -109,7 +102,9 @@ class MainActivity : AppCompatActivity() {
                 override fun onDeniedForever(deniedForeverP: ArrayList<String>?) {
                 }
             })
-
+        }
+        btnJumpToMusicClip.setOnClickListener {
+            startActivity(Intent(this, MusicClipActivity::class.java))
         }
     }
     // </editor-fold>

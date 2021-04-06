@@ -15,10 +15,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".scene.cameratest.CameraTestActivity"></activity>
-        <activity android:name="com.hwilliamgo.fuzzy_video_drill.scene.videocall.VideoCallActivity" />
-        <activity android:name="com.hwilliamgo.fuzzy_video_drill.scene.screenprojection.ScreenProjectionWatchActivity" />
-        <activity android:name="com.hwilliamgo.fuzzy_video_drill.scene.screenprojection.ScreenProjectionPushActivity" />
+        <activity android:name=".scene.musicclip.MusicClipActivity"></activity>
+        <activity android:name=".scene.cameratest.CameraTestActivity" />
+        <activity android:name=".scene.videocall.VideoCallActivity" />
+        <activity android:name=".scene.screenprojection.ScreenProjectionWatchActivity" />
+        <activity android:name=".scene.screenprojection.ScreenProjectionPushActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
