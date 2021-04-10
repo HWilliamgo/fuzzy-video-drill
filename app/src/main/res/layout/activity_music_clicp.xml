@@ -13,4 +13,12 @@
         android:text="开始剪裁音频"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:layout_marginTop="20dp"
+        android:id="@+id/btn_start_mix_audio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="开始混合音频"
+        app:layout_constraintTop_toBottomOf="@id/btn_start_clip_audio" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

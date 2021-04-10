@@ -18,14 +18,21 @@ import kotlin.concurrent.thread
 class MusicClipActivity : AppCompatActivity() {
 
     // <editor-fold defaultstate="collapsed" desc="变量">
-    private val assetsName="Afterglow - Taylor Swift.mp3"
+    private val assetsNameA = "Afterglow - Taylor Swift.mp3"
+    private val assetsNameB = "music.mp3"
 
     private val btnStartClipAudio: Button by lazy { findViewById<Button>(R.id.btn_start_clip_audio) }
-    private val musicSourcePath =
-        File(Environment.getExternalStorageDirectory(), assetsName).absolutePath
+    private val btnStartMixAudio: Button by lazy { findViewById(R.id.btn_start_mix_audio) }
+    private val musicSourcePathA =
+        File(Environment.getExternalStorageDirectory(), assetsNameA).absolutePath
+    private val musicSourcePathB =
+        File(Environment.getExternalStorageDirectory(), assetsNameB).absolutePath
 
     @Volatile
     private var isClipFinished = true
+
+    @Volatile
+    private var isMixFinished = true
     // </editor-fold>
 
 
@@ -35,7 +42,8 @@ class MusicClipActivity : AppCompatActivity() {
 
         initView()
         requestPermission {
-            copyAssets(assetsName, musicSourcePath)
+            copyAssets(assetsNameA, musicSourcePathA)
+            copyAssets(assetsNameB, musicSourcePathB)
         }
     }
 
@@ -43,18 +51,43 @@ class MusicClipActivity : AppCompatActivity() {
     private fun initView() {
         btnStartClipAudio.setOnClickListener {
             if (isClipFinished) {
-                isClipFinished=false
+                isClipFinished = false
                 thread {
                     try {
                         AudioClipper.clip(
-                            musicSourcePath, "outputClipWav",
+                            musicSourcePathA, "outputClipWav",
                             10 * 1000 * 1000,
                             15 * 1000 * 1000
                         )
-                    }catch (e:Exception){
+                    } catch (e: Exception) {
                         e.printStackTrace()
                     }
                     isClipFinished = true
+                }
+            }
+        }
+        btnStartMixAudio.setOnClickListener {
+            if (isMixFinished) {
+                isMixFinished = false
+                thread {
+                    try {
+                        val outputPath = File(
+                            Environment.getExternalStorageDirectory(),
+                            "mixAudioWAV.wav"
+                        ).absolutePath
+                        AudioClipper.mixAudioTrack(
+                            musicSourcePathA,
+                            musicSourcePathB,
+                            outputPath,
+                            60 * 1000 * 1000,
+                            70 * 1000 * 1000,
+                            50,
+                            50
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    isMixFinished = true
                 }
             }
         }
