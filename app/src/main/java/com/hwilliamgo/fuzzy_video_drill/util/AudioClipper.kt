@@ -205,20 +205,6 @@ object AudioClipper {
         isB.close()
         fos.close()
     }
-    // </editor-fold>
-
-    // <editor-fold defaultstate="collapsed" desc="选择轨道">
-    private fun selectAudioTrack(mediaExtractor: MediaExtractor): Int {
-        val numTracks: Int = mediaExtractor.trackCount
-        for (i in 0 until numTracks) {
-            val format: MediaFormat = mediaExtractor.getTrackFormat(i)
-            val mime = format.getString(MediaFormat.KEY_MIME)
-            if (mime.startsWith("audio/")) {
-                return i
-            }
-        }
-        return -1
-    }
 
     /**
      * 将音频文件解码成pcm文件
@@ -248,7 +234,7 @@ object AudioClipper {
         val audioTrackIndex: Int
         val mediaExtractor = MediaExtractor().apply {
             setDataSource(inputPath)
-            audioTrackIndex = selectAudioTrack(this)
+            audioTrackIndex = MediaTrackSelector.selectTrack(this, true)
             selectTrack(audioTrackIndex)
             seekTo(startTimeUs, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
         }

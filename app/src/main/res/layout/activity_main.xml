@@ -72,6 +72,13 @@
             android:layout_margin="10dp"
             android:text="音频剪裁" />
 
+        <Button
+            android:onClick="onClick"
+            android:id="@+id/btn_fast_test"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="快速测试" />
+
     </LinearLayout>
 
 

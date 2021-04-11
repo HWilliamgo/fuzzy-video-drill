@@ -3,11 +3,13 @@ package com.hwilliamgo.fuzzy_video_drill
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.util.ToastUtils
 import com.hwilliamgo.fuzzy_video_drill.scene.cameratest.CameraTestActivity
+import com.hwilliamgo.fuzzy_video_drill.scene.fasttest.FastTestActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.musicclip.MusicClipActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.screenprojection.ScreenProjectionPushActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.screenprojection.ScreenProjectionWatchActivity
@@ -105,6 +107,14 @@ class MainActivity : AppCompatActivity() {
         }
         btnJumpToMusicClip.setOnClickListener {
             startActivity(Intent(this, MusicClipActivity::class.java))
+        }
+    }
+
+    fun onClick(view: View) {
+        when (view.id) {
+            R.id.btn_fast_test -> {
+                startActivity(Intent(this,FastTestActivity::class.java))
+            }
         }
     }
     // </editor-fold>

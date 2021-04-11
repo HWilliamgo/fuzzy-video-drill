@@ -15,7 +15,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".scene.musicclip.MusicClipActivity"></activity>
+        <activity
+            android:name=".scene.fasttest.FastTestActivity"
+            android:exported="true" />
+        <activity android:name=".scene.musicclip.MusicClipActivity" />
         <activity android:name=".scene.cameratest.CameraTestActivity" />
         <activity android:name=".scene.videocall.VideoCallActivity" />
         <activity android:name=".scene.screenprojection.ScreenProjectionWatchActivity" />
