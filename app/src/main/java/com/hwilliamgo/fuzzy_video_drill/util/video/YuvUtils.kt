@@ -1,4 +1,4 @@
-package com.hwilliamgo.fuzzy_video_drill.util
+package com.hwilliamgo.fuzzy_video_drill.util.video
 
 /**
  * date: 2021/3/16

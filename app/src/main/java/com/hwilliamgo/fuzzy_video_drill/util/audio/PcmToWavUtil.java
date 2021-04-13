@@ -1,4 +1,4 @@
-package com.hwilliamgo.fuzzy_video_drill.util;
+package com.hwilliamgo.fuzzy_video_drill.util.audio;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;

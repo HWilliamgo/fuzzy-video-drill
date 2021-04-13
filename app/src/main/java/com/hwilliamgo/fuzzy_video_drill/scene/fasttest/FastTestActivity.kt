@@ -11,9 +11,8 @@ import android.view.View
 import com.blankj.utilcode.util.LogUtils
 import com.hwilliamgo.fuzzy_video_drill.R
 import com.hwilliamgo.fuzzy_video_drill.util.Stopper
-import com.hwilliamgo.fuzzy_video_drill.util.WavReader
+import com.hwilliamgo.fuzzy_video_drill.util.audio.WavReader
 import java.io.File
-import kotlin.concurrent.thread
 
 class FastTestActivity : AppCompatActivity() {
     private var stopWAVReader: Stopper? = null

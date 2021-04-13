@@ -6,7 +6,7 @@ import android.os.Environment
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.hwilliamgo.fuzzy_video_drill.R
-import com.hwilliamgo.fuzzy_video_drill.util.AudioClipper
+import com.hwilliamgo.fuzzy_video_drill.util.audio.AudioClipper
 import com.william.fastpermisssion.FastPermission
 import com.william.fastpermisssion.OnPermissionCallback
 import java.io.File

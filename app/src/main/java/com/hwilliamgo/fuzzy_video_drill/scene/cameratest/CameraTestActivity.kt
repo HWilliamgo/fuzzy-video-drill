@@ -16,7 +16,7 @@ import com.hwilliamgo.fuzzy_video_drill.R
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraFactory
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraImplType
 import com.hwilliamgo.fuzzy_video_drill.camera.ICamera
-import com.hwilliamgo.fuzzy_video_drill.util.YuvUtils
+import com.hwilliamgo.fuzzy_video_drill.util.video.YuvUtils
 import com.william.fastpermisssion.FastPermission
 import com.william.fastpermisssion.OnPermissionCallback
 import java.io.File
