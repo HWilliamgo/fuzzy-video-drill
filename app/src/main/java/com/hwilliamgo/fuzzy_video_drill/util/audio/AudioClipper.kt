@@ -25,6 +25,7 @@ object AudioClipper {
     // <editor-fold defaultstate="collapsed" desc="变量">
     private val TAG = AudioClipper::class.java.simpleName
     private const val CODEC_TIMEOUT = 100000L
+    private const val CODEC_TIMEOUT_SMALL = 1000L;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="API">
@@ -175,7 +176,7 @@ object AudioClipper {
 
         var tmpVolumeA: Int
         var tmpVolumeB: Int
-        var tmpVolumeOutput: Int
+        var tmpVolumeOutput: Short
 
         var isAEnd = false
         var isBEnd = false
@@ -189,19 +190,19 @@ object AudioClipper {
                 for (i in inputBufferB.indices step 2) {
                     tmpVolumeA =
                         (inputBufferA[i].toInt() and 0xff) or ((inputBufferA[i + 1].toInt() and 0xff) shl 8)
-                    tmpVolumeA = valueWithinShort(tmpVolumeA).toInt()
+//                    tmpVolumeA = valueWithinShort(tmpVolumeA).toInt()
                     tmpVolumeB =
                         (inputBufferB[i].toInt() and 0xff) or ((inputBufferB[i + 1].toInt() and 0xff) shl 8)
-                    tmpVolumeB = valueWithinShort(tmpVolumeB).toInt()
-                    tmpVolumeOutput = (tmpVolumeA * volumeA + tmpVolumeB * volumeB).toInt()
-//                    if (tmpVolumeOutput > Short.MAX_VALUE) {
-//                        tmpVolumeOutput = Short.MAX_VALUE.toInt()
-//                    } else if (tmpVolumeOutput < Short.MIN_VALUE) {
-//                        tmpVolumeOutput = Short.MIN_VALUE.toInt()
-//                    }
+//                    tmpVolumeB = valueWithinShort(tmpVolumeB).toInt()
+                    tmpVolumeOutput = (tmpVolumeA * volumeA + tmpVolumeB * volumeB).toInt().toShort()
+                    if (tmpVolumeOutput > Short.MAX_VALUE) {
+                        tmpVolumeOutput = Short.MAX_VALUE
+                    } else if (tmpVolumeOutput < Short.MIN_VALUE) {
+                        tmpVolumeOutput = Short.MIN_VALUE
+                    }
 
-                    outputBuffer[i] = (tmpVolumeOutput and 0xFF).toByte()
-                    outputBuffer[i + 1] = (tmpVolumeOutput ushr 8 and 0xFF).toByte()
+                    outputBuffer[i] = (tmpVolumeOutput.toInt() and 0xFF).toByte()
+                    outputBuffer[i + 1] = (tmpVolumeOutput.toInt() ushr 8 and 0xFF).toByte()
                 }
                 fos.write(outputBuffer)
             }
@@ -273,7 +274,7 @@ object AudioClipper {
         val bufferInfo = MediaCodec.BufferInfo()
         var outputBufferIndex = -1
         while (true) {
-            val inputBufferIndex = mediaCodec.dequeueInputBuffer(CODEC_TIMEOUT)
+            val inputBufferIndex = mediaCodec.dequeueInputBuffer(CODEC_TIMEOUT_SMALL)
             if (inputBufferIndex >= 0) {
                 //todo log mediaExtractor.sampleTime
                 val sampleTime = mediaExtractor.sampleTime
@@ -317,12 +318,12 @@ object AudioClipper {
                 }
             }
 
-            outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, CODEC_TIMEOUT)
+            outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, CODEC_TIMEOUT_SMALL)
             while (outputBufferIndex >= 0) {
                 val outputBuffer = mediaCodec.getOutputBuffer(outputBufferIndex)
                 writeChannel.write(outputBuffer)
                 mediaCodec.releaseOutputBuffer(outputBufferIndex, false)
-                outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, CODEC_TIMEOUT)
+                outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, CODEC_TIMEOUT_SMALL)
             }
         }
 
