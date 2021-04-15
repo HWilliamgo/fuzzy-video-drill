@@ -188,19 +188,24 @@ object AudioClipper {
             if (!isBEnd) {
                 isBEnd = isB.read(inputBufferB) == -1
                 for (i in inputBufferB.indices step 2) {
+                    //16位的pcm，低8位在前，高8位在后，取低8位和高8位混合。
                     tmpVolumeA =
                         ((inputBufferA[i].toInt() and 0xff) or ((inputBufferA[i + 1].toInt() and 0xff) shl 8)).toShort()
                     tmpVolumeB =
                         ((inputBufferB[i].toInt() and 0xff) or ((inputBufferB[i + 1].toInt() and 0xff) shl 8)).toShort()
 //                    tmpVolumeA = BitOperation.a(inputBufferA[i], inputBufferA[i + 1])
 //                    tmpVolumeB = BitOperation.a(inputBufferB[i], inputBufferB[i + 1])
+
+                    //按比例加权平均
                     tmpVolumeOutput = (tmpVolumeA * volumeA + tmpVolumeB * volumeB).toInt()
+
                     if (tmpVolumeOutput > Short.MAX_VALUE) {
                         tmpVolumeOutput = Short.MAX_VALUE.toInt()
                     } else if (tmpVolumeOutput < Short.MIN_VALUE) {
                         tmpVolumeOutput = Short.MIN_VALUE.toInt()
                     }
 
+                    //取混合后的数据的低8位和高8位，分别填充到输出pcm的缓冲区的前、后字节。
                     outputBuffer[i] = (tmpVolumeOutput and 0xFF).toByte()
                     outputBuffer[i + 1] = (tmpVolumeOutput ushr 8 and 0xFF).toByte()
                 }
