@@ -8,6 +8,7 @@ import android.media.MediaFormat
 import android.os.Environment
 import android.util.Log
 import com.blankj.utilcode.util.Utils
+import com.hwilliamgo.fuzzy_video_drill.util.BitOperation
 import com.hwilliamgo.fuzzy_video_drill.util.MediaTrackSelector
 import com.hwilliamgo.fuzzy_video_drill.util.file.HexStringFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
@@ -33,7 +34,7 @@ object AudioClipper {
      * 剪裁音频
      */
     @SuppressLint("WrongConstant")
-    fun clip(inputPath: String, outputFileName: String, startTime: Long, endTime: Long) {
+    fun clip(inputPath: String, outputPath: String, startTime: Long, endTime: Long) {
         if (endTime < startTime) {
             return
         }
@@ -55,12 +56,11 @@ object AudioClipper {
                 channelCount,
                 AudioFormat.ENCODING_PCM_16BIT
             )
-        val outputWavFile = File(Environment.getExternalStorageDirectory(), "$outputFileName.wav")
-        pcmToWavUtil.pcmToWav(outputTmpPcm.absolutePath, outputWavFile.absolutePath)
+        pcmToWavUtil.pcmToWav(outputTmpPcm.absolutePath, outputPath)
         fileWriter.destroy()
         Log.d(
             TAG,
-            "successfully clip audio, input :$inputPath, output:${outputWavFile.absolutePath}"
+            "successfully clip audio, input :$inputPath, output:${outputPath}"
         )
     }
 
@@ -174,9 +174,9 @@ object AudioClipper {
         val isB = FileInputStream(inputPathB)
         val fos = FileOutputStream(outputPath)
 
-        var tmpVolumeA: Int
-        var tmpVolumeB: Int
-        var tmpVolumeOutput: Short
+        var tmpVolumeA: Short
+        var tmpVolumeB: Short
+        var tmpVolumeOutput: Int
 
         var isAEnd = false
         var isBEnd = false
@@ -189,20 +189,20 @@ object AudioClipper {
                 isBEnd = isB.read(inputBufferB) == -1
                 for (i in inputBufferB.indices step 2) {
                     tmpVolumeA =
-                        (inputBufferA[i].toInt() and 0xff) or ((inputBufferA[i + 1].toInt() and 0xff) shl 8)
-//                    tmpVolumeA = valueWithinShort(tmpVolumeA).toInt()
+                        ((inputBufferA[i].toInt() and 0xff) or ((inputBufferA[i + 1].toInt() and 0xff) shl 8)).toShort()
                     tmpVolumeB =
-                        (inputBufferB[i].toInt() and 0xff) or ((inputBufferB[i + 1].toInt() and 0xff) shl 8)
-//                    tmpVolumeB = valueWithinShort(tmpVolumeB).toInt()
-                    tmpVolumeOutput = (tmpVolumeA * volumeA + tmpVolumeB * volumeB).toInt().toShort()
+                        ((inputBufferB[i].toInt() and 0xff) or ((inputBufferB[i + 1].toInt() and 0xff) shl 8)).toShort()
+//                    tmpVolumeA = BitOperation.a(inputBufferA[i], inputBufferA[i + 1])
+//                    tmpVolumeB = BitOperation.a(inputBufferB[i], inputBufferB[i + 1])
+                    tmpVolumeOutput = (tmpVolumeA * volumeA + tmpVolumeB * volumeB).toInt()
                     if (tmpVolumeOutput > Short.MAX_VALUE) {
-                        tmpVolumeOutput = Short.MAX_VALUE
+                        tmpVolumeOutput = Short.MAX_VALUE.toInt()
                     } else if (tmpVolumeOutput < Short.MIN_VALUE) {
-                        tmpVolumeOutput = Short.MIN_VALUE
+                        tmpVolumeOutput = Short.MIN_VALUE.toInt()
                     }
 
-                    outputBuffer[i] = (tmpVolumeOutput.toInt() and 0xFF).toByte()
-                    outputBuffer[i + 1] = (tmpVolumeOutput.toInt() ushr 8 and 0xFF).toByte()
+                    outputBuffer[i] = (tmpVolumeOutput and 0xFF).toByte()
+                    outputBuffer[i + 1] = (tmpVolumeOutput ushr 8 and 0xFF).toByte()
                 }
                 fos.write(outputBuffer)
             }

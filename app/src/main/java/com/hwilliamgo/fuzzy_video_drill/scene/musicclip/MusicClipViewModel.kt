@@ -4,23 +4,16 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.os.Environment
-import android.widget.Button
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.hwilliamgo.fuzzy_video_drill.R
 import com.hwilliamgo.fuzzy_video_drill.util.audio.AudioClipper
 import com.william.fastpermisssion.FastPermission
 import com.william.fastpermisssion.OnPermissionCallback
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.util.ArrayList
-import kotlin.concurrent.thread
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -65,7 +58,7 @@ class MusicClipViewModel : ViewModel() {
     suspend fun copyAssets(context: Context) = withContext(Dispatchers.IO) {
         val assets = context.assets.list("")
         assets?.forEach { assetName ->
-            if (assetName.endsWith(".mp3")){
+            if (assetName.endsWith(".mp3")) {
                 copyAssets(
                     context,
                     assetName,
@@ -77,33 +70,41 @@ class MusicClipViewModel : ViewModel() {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="剪裁音频">
-    suspend fun clipAudio() = withContext(Dispatchers.IO) {
+    suspend fun clipAudio(): String = withContext(Dispatchers.IO) {
+        var outputPath = ""
         try {
+            outputPath = getPathOfMusic("outputClipWav")
             AudioClipper.clip(
-                getPathOfMusic(musicA), "outputClipWav",
+                getPathOfMusic(musicA), outputPath,
                 10 * 1000 * 1000,
                 15 * 1000 * 1000
             )
+            return@withContext outputPath
         } catch (e: Exception) {
             e.printStackTrace()
+            return@withContext outputPath
         }
     }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="混合音频">
     suspend fun mixAudio() = withContext(Dispatchers.IO) {
+        var outputPath = ""
         try {
+            outputPath = getPathOfMusic("mixAudioWAV.wav")
             AudioClipper.mixAudioTrack(
                 getPathOfMusic(musicA),
                 getPathOfMusic(musicB),
-                getPathOfMusic("mixAudioWAV.wav"),
+                outputPath,
                 60 * 1000 * 1000,
                 70 * 1000 * 1000,
                 50,
                 50
             )
+            return@withContext outputPath
         } catch (e: Exception) {
             e.printStackTrace()
+            return@withContext outputPath
         }
     }
     // </editor-fold>

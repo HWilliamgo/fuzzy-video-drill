@@ -11,44 +11,28 @@ import android.view.View
 import com.blankj.utilcode.util.LogUtils
 import com.hwilliamgo.fuzzy_video_drill.R
 import com.hwilliamgo.fuzzy_video_drill.util.Stopper
+import com.hwilliamgo.fuzzy_video_drill.util.audio.AudioPlayer
 import com.hwilliamgo.fuzzy_video_drill.util.audio.WavReader
 import java.io.File
 
 class FastTestActivity : AppCompatActivity() {
     private var stopWAVReader: Stopper? = null
     private var audioTrack: AudioTrack? = null
+    private val audioPlayer = AudioPlayer()
 
     // <editor-fold defaultstate="collapsed" desc="生命周期">
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fast_test)
-        initAudioTrack()
+        audioPlayer.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         stopWAVReader?.stop()
-        try {
-            audioTrack?.stop()
-            audioTrack?.release()
-        }catch (e:Exception){
-            e.printStackTrace()
-        }
+        audioPlayer.stop()
     }
     // </editor-fold>
-
-    private fun initAudioTrack() {
-        val audioAttr = AudioAttributes.Builder()
-            .setLegacyStreamType(AudioManager.STREAM_MUSIC)
-            .build()
-        val audioFormat = AudioFormat.Builder()
-            .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
-            .setSampleRate(44100)
-            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-            .build()
-        audioTrack = AudioTrack(audioAttr, audioFormat, 2048, AudioTrack.MODE_STREAM, AudioManager.AUDIO_SESSION_ID_GENERATE)
-        audioTrack?.play()
-    }
 
     // <editor-fold defaultstate="collapsed" desc="点击事件">
     fun onClick(view: View) {
@@ -59,7 +43,7 @@ class FastTestActivity : AppCompatActivity() {
                     LogUtils.e(errMsg)
                 }) { sampleData ->
                     LogUtils.d("sampleData.size=${sampleData.size}")
-                    audioTrack?.write(sampleData, 0, sampleData.size)
+                    audioPlayer.writeData(sampleData)
                 }
             }
         }
