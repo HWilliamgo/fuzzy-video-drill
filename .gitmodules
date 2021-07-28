@@ -1,0 +1,3 @@
+[submodule "LiveRtmp"]
+	path = LiveRtmp
+	url = https://github.com/HWilliamgo/LiveRtmp.git
