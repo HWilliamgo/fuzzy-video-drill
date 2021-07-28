@@ -1,2 +1,5 @@
-include ':app'
 rootProject.name = "fuzzy-video-drill"
+
+include ':app'
+include ':livertmp'
+project(":livertmp").projectDir=new File("./LiveRtmp/livertmp")

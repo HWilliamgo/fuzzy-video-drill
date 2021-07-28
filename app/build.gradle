@@ -52,4 +52,6 @@ dependencies {
     implementation "com.hwilliamgo:fastpermission-x:1.0.0"
     //websocket
     implementation "org.java-websocket:Java-WebSocket:1.4.0"
+
+    implementation project(":livertmp")
 }

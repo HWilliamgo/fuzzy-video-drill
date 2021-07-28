@@ -21,6 +21,8 @@ allprojects {
     }
 }
 
+project(":livertmp").isLibrary = "true"
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
