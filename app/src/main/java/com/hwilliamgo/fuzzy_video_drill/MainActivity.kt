@@ -11,6 +11,7 @@ import com.blankj.utilcode.util.ToastUtils
 import com.hwilliamgo.fuzzy_video_drill.scene.cameratest.CameraTestActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.fasttest.FastTestActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.musicclip.MusicClipActivity
+import com.hwilliamgo.fuzzy_video_drill.scene.rtmppush.RtmpPushActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.screenprojection.ScreenProjectionPushActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.screenprojection.ScreenProjectionWatchActivity
 import com.hwilliamgo.fuzzy_video_drill.scene.videocall.VideoCallActivity
@@ -113,7 +114,10 @@ class MainActivity : AppCompatActivity() {
     fun onClick(view: View) {
         when (view.id) {
             R.id.btn_fast_test -> {
-                startActivity(Intent(this,FastTestActivity::class.java))
+                startActivity(Intent(this, FastTestActivity::class.java))
+            }
+            R.id.btn_jump_to_rtmp_push -> {
+                startActivity(Intent(this, RtmpPushActivity::class.java))
             }
         }
     }
