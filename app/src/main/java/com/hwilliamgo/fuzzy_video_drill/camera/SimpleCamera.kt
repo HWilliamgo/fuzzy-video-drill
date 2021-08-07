@@ -78,11 +78,13 @@ class SimpleCamera : ICamera {
             val maxFrameRate = frameRateRange[1]
             LogUtils.d("frameRate=$frameRate, minFrameRate=$minFrameRate, maxFrameRate=$maxFrameRate")
 
+            val msgBuilder = StringBuilder("\n")
             for (previewSize in camera!!.parameters.supportedPreviewSizes) {
-                LogUtils.d("${previewSize.width}, ${previewSize.height}")
+                msgBuilder.append("${previewSize.width}, ${previewSize.height}\n")
             }
+            LogUtils.d(msgBuilder.toString())
             parameters.setPreviewSize(1920, 1080)
-            it.parameters=parameters
+            it.parameters = parameters
 
             cameraWidth = parameters.previewSize.width
             cameraHeight = parameters.previewSize.height

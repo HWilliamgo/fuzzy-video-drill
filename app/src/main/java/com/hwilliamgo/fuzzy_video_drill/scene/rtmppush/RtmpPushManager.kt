@@ -1,6 +1,6 @@
 package com.hwilliamgo.fuzzy_video_drill.scene.rtmppush
 
-import com.hwilliamgo.livertmp.RTMPX264Jni
+import com.hwilliamgo.livertmp.jni.RTMPX264Jni
 
 /**
  * date: 2021/8/1
