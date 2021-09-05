@@ -14,15 +14,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".scene.rtmppush.RtmpPushActivity"></activity>
-        <activity
-            android:name=".scene.fasttest.FastTestActivity"
-            android:exported="true" />
-        <activity android:name=".scene.musicclip.MusicClipActivity" />
-        <activity android:name=".scene.cameratest.CameraTestActivity" />
-        <activity android:name=".scene.videocall.VideoCallActivity" />
-        <activity android:name=".scene.screenprojection.ScreenProjectionWatchActivity" />
-        <activity android:name=".scene.screenprojection.ScreenProjectionPushActivity" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,6 +22,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".scene.rtmppush.RtmpPushActivity" />
+        <activity android:name=".scene.musicclip.MusicClipActivity" />
+        <activity android:name=".scene.cameratest.CameraTestActivity" />
+        <activity android:name=".scene.videocall.VideoCallActivity" />
+        <activity android:name=".scene.screenprojection.ScreenProjectionWatchActivity" />
+        <activity android:name=".scene.screenprojection.ScreenProjectionPushActivity" />
+        <activity android:name=".scene.fasttest.FastTestActivity" />
+
     </application>
 
 </manifest>
