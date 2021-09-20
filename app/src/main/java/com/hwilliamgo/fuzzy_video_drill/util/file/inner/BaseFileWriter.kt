@@ -1,7 +1,8 @@
-package com.hwilliamgo.fuzzy_video_drill.util.file
+package com.hwilliamgo.fuzzy_video_drill.util.file.inner
 
 import android.os.Environment
 import com.blankj.utilcode.util.LogUtils
+import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException

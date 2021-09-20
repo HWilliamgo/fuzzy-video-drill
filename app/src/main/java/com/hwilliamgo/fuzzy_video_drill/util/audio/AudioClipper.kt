@@ -5,12 +5,10 @@ import android.media.AudioFormat
 import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
-import android.os.Environment
 import android.util.Log
 import com.blankj.utilcode.util.Utils
-import com.hwilliamgo.fuzzy_video_drill.util.BitOperation
 import com.hwilliamgo.fuzzy_video_drill.util.MediaTrackSelector
-import com.hwilliamgo.fuzzy_video_drill.util.file.HexStringFileWriter
+import com.hwilliamgo.fuzzy_video_drill.util.file.inner.HexStringFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
 import java.io.File
 import java.io.FileInputStream

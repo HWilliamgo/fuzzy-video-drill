@@ -5,8 +5,8 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.util.Log
 import com.blankj.utilcode.util.LogUtils
-import com.hwilliamgo.fuzzy_video_drill.util.file.FastFileWriter
-import com.hwilliamgo.fuzzy_video_drill.util.file.HexStringFileWriter
+import com.hwilliamgo.fuzzy_video_drill.util.file.inner.FastFileWriter
+import com.hwilliamgo.fuzzy_video_drill.util.file.inner.HexStringFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
 import java.nio.ByteBuffer
 

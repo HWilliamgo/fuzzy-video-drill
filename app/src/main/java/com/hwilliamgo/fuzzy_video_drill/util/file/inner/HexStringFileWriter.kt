@@ -1,4 +1,4 @@
-package com.hwilliamgo.fuzzy_video_drill.util.file
+package com.hwilliamgo.fuzzy_video_drill.util.file.inner
 
 import java.io.IOException
 import java.nio.ByteBuffer
