@@ -16,6 +16,10 @@ object RtmpPushManager {
         RTMPX264Jni.native_setVideoEncoderInfo(width, height, fps, bitrate)
     }
 
+    fun start(url: String) {
+        RTMPX264Jni.native_start(url)
+    }
+
     fun pushVideo(yuvData: ByteArray) {
         RTMPX264Jni.native_pushVideo(yuvData)
     }
