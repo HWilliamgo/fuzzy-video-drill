@@ -76,3 +76,25 @@ X264_API int x264_encoder_headers( x264_t *, x264_nal_t **pp_nal, int *pi_nal );
 ```
 
 将SPS和PPS数据取出并放在码流开头，就和MediaCodec的效果一样了。
+
+
+
+### Log
+![architecture](readme_res/log.png)
+
+日志模块的对外的API是MyLog。
+
+- MyLog：是声明在log_abs.h文件中的命名空间，他有一个对Log接口的引用。
+
+而Log的具体实现类是可以配置的，可以选择实现类型。
+
+目前项目中的实现，是`SimpleLog`与用装饰者模式的`LogLevelInterceptor`结合的实现。
+
+- Log：Log是一个抽象类，他的函数是纯虚函数。
+
+- SimpleLog：是对NDK中的`__android_log_print`的一个简单封装。
+
+- LogDecor：是对Log接口实现的装饰器模式。
+
+- LogLevelInterceptor：是日志级别过滤器，用于过滤掉对应级别的日志。
+

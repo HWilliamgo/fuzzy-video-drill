@@ -15,6 +15,7 @@ import com.hwilliamgo.fuzzy_video_drill.ext.requestPermission
 import com.hwilliamgo.fuzzy_video_drill.util.file.FileWriterFactory
 import com.hwilliamgo.fuzzy_video_drill.util.file.FileWriterType
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
+import com.hwilliamgo.livertmp.jni.X264Jni
 
 class RtmpPushActivity : AppCompatActivity() {
     companion object {
@@ -26,8 +27,12 @@ class RtmpPushActivity : AppCompatActivity() {
     private var camera: ICamera? = null
     private val fileWriter: IFileWriter by lazy {
         FileWriterFactory.newFileWriter(
-            FileWriterType.HEX_STRING_WRITER,
-            "x264_encod_output.txt"
+            FileWriterType.HEX_STRING_WRITER, "x264_encod_output.txt"
+        )
+    }
+    private val byteFileWriter: IFileWriter by lazy {
+        FileWriterFactory.newFileWriter(
+            FileWriterType.FAST_WRITER, "byteData_x264_encode_output.h264"
         )
     }
 
@@ -35,6 +40,7 @@ class RtmpPushActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_rtmp_push)
         RtmpPushManager.init()
+//        X264Jni.init()
         camera = CameraFactory.createCamera(CameraImplType.CAMERA_1)
 
         rtmpPushSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
@@ -46,9 +52,11 @@ class RtmpPushActivity : AppCompatActivity() {
                     camera?.init(holder) { w, h ->
                         RtmpPushManager.setVideoEncoderInfo(w, h, FRAME_RATE, BITRATE)
                         RtmpPushManager.start(BuildConfig.RTMP_PUSH_URL)
+//                        X264Jni.setVideoCodecInfo(w, h, FRAME_RATE, BITRATE)
                     }
                     camera?.setPreviewCallback { yuvData ->
                         RtmpPushManager.pushVideo(yuvData)
+//                        X264Jni.encode(yuvData)
                     }
                 }
             }
@@ -66,12 +74,19 @@ class RtmpPushActivity : AppCompatActivity() {
                 LogUtils.d("surfaceDestroyed $holder")
             }
         })
+
+        X264Jni.setOnX264JniEncodeListener {
+            fileWriter.writeData2File(it)
+            byteFileWriter.writeData2File(it)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         camera?.destroy()
         fileWriter.destroy()
+        byteFileWriter.destroy()
+//        X264Jni.destroy()
         RtmpPushManager.stop()
         RtmpPushManager.release()
     }
