@@ -19,7 +19,7 @@ import com.hwilliamgo.livertmp.jni.X264Jni
 
 class RtmpPushActivity : AppCompatActivity() {
     companion object {
-        const val BITRATE = 720 * 1024
+        const val BITRATE = 720 * 1024 * 1024
         const val FRAME_RATE = 30
     }
 
