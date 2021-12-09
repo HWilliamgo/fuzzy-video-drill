@@ -29,6 +29,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    // CameraX 需要用java 8
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 dependencies {
@@ -54,6 +62,14 @@ dependencies {
     implementation Dependencies.fastpermission_x
     //websocket
     implementation Dependencies.websocket
+    // camerax
+    implementation Dependencies.camerax
+    implementation Dependencies.camera_lifecycle
+    implementation Dependencies.camera_camera2
+    implementation Dependencies.camera_view
+    //WindowManager
+    implementation Dependencies.window_manager
+    // test
     testImplementation Dependencies.junit
     androidTestImplementation Dependencies.androidx_junit
     androidTestImplementation Dependencies.espresso_core

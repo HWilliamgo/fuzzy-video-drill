@@ -18,6 +18,9 @@ object Versions {
     const val utilcodex             = "1.25.9"
     const val fastpermission_x      = "1.0.0"
     const val websocket             = "1.4.0"
+    const val camerax               = "1.1.0-alpha07"
+    const val camera_view           = "1.0.0-alpha27"
+    const val window_manager        = "1.0.0-alpha09"
 }
 
 object Dependencies {
@@ -36,4 +39,9 @@ object Dependencies {
     const val utilcodex             = "com.blankj:utilcodex:${Versions.utilcodex}"
     const val fastpermission_x      = "com.hwilliamgo:fastpermission-x:${Versions.fastpermission_x}"
     const val websocket             = "org.java-websocket:Java-WebSocket:${Versions.websocket}"
+    const val camerax               = "androidx.camera:camera-camera2:${Versions.camerax}"
+    const val camera_lifecycle      = "androidx.camera:camera-lifecycle:${Versions.camerax}"
+    const val camera_camera2        = "androidx.camera:camera-camera2:${Versions.camerax}"
+    const val camera_view           = "androidx.camera:camera-view:${Versions.camera_view}"
+    const val window_manager        = "androidx.window:window:${Versions.window_manager}"
 }

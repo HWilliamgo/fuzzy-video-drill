@@ -5,8 +5,13 @@
     android:layout_height="match_parent"
     tools:context=".scene.rtmppush.RtmpPushActivity">
 
-    <SurfaceView
-        android:id="@+id/rtmp_push_surface_view"
+<!--    <SurfaceView-->
+<!--        android:id="@+id/rtmp_push_surface_view"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent" />-->
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/rtmp_push_preview_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

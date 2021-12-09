@@ -2,14 +2,10 @@ package com.hwilliamgo.fuzzy_video_drill.scene.rtmppush
 
 import android.Manifest
 import android.os.Bundle
-import android.view.SurfaceHolder
-import android.view.SurfaceView
 import androidx.appcompat.app.AppCompatActivity
-import com.blankj.utilcode.util.LogUtils
-import com.hwilliamgo.fuzzy_video_drill.BuildConfig
+import androidx.camera.view.PreviewView
 import com.hwilliamgo.fuzzy_video_drill.R
-import com.hwilliamgo.fuzzy_video_drill.camera.CameraFactory
-import com.hwilliamgo.fuzzy_video_drill.camera.CameraImplType
+import com.hwilliamgo.fuzzy_video_drill.camera.CameraX
 import com.hwilliamgo.fuzzy_video_drill.camera.ICamera
 import com.hwilliamgo.fuzzy_video_drill.ext.requestPermission
 import com.hwilliamgo.fuzzy_video_drill.util.file.FileWriterFactory
@@ -23,7 +19,8 @@ class RtmpPushActivity : AppCompatActivity() {
         const val FRAME_RATE = 30
     }
 
-    private val rtmpPushSurfaceView: SurfaceView by lazy { findViewById(R.id.rtmp_push_surface_view) }
+    //    private val rtmpPushSurfaceView: SurfaceView by lazy { findViewById(R.id.rtmp_push_surface_view) }
+    private val rtmpPushPreviewView: PreviewView by lazy { findViewById(R.id.rtmp_push_preview_view) }
     private var camera: ICamera? = null
     private val fileWriter: IFileWriter by lazy {
         FileWriterFactory.newFileWriter(
@@ -41,39 +38,51 @@ class RtmpPushActivity : AppCompatActivity() {
         setContentView(R.layout.activity_rtmp_push)
         RtmpPushManager.init()
 //        X264Jni.init()
-        camera = CameraFactory.createCamera(CameraImplType.CAMERA_1)
-
-        rtmpPushSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                requestPermission(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) {
-                    camera?.init(holder) { w, h ->
-                        RtmpPushManager.setVideoEncoderInfo(w, h, FRAME_RATE, BITRATE)
-                        RtmpPushManager.start(BuildConfig.RTMP_PUSH_URL)
-//                        X264Jni.setVideoCodecInfo(w, h, FRAME_RATE, BITRATE)
-                    }
-                    camera?.setPreviewCallback { yuvData ->
-                        RtmpPushManager.pushVideo(yuvData)
-//                        X264Jni.encode(yuvData)
-                    }
-                }
+        requestPermission(
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) {
+            camera = CameraX(this)
+            (camera as CameraX).apply {
+                rtmpPushPreviewView.postDelayed({
+                    setPrevieView(rtmpPushPreviewView)
+                    init(this@RtmpPushActivity)
+                }, 2000)
             }
+        }
 
-            override fun surfaceChanged(
-                holder: SurfaceHolder?,
-                format: Int,
-                width: Int,
-                height: Int
-            ) {
-                LogUtils.d("surfaceChanged $holder, format=$format , width=$width, height=$height")
-            }
 
-            override fun surfaceDestroyed(holder: SurfaceHolder?) {
-                LogUtils.d("surfaceDestroyed $holder")
-            }
-        })
+//        rtmpPushSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
+//            override fun surfaceCreated(holder: SurfaceHolder) {
+//                requestPermission(
+//                    Manifest.permission.CAMERA,
+//                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+//                ) {
+//                    camera?.init(holder) { w, h ->
+//                        RtmpPushManager.setVideoEncoderInfo(w, h, FRAME_RATE, BITRATE)
+//                        RtmpPushManager.start(BuildConfig.RTMP_PUSH_URL)
+////                        X264Jni.setVideoCodecInfo(w, h, FRAME_RATE, BITRATE)
+//                    }
+//                    camera?.setPreviewCallback { yuvData ->
+//                        RtmpPushManager.pushVideo(yuvData)
+////                        X264Jni.encode(yuvData)
+//                    }
+//                }
+//            }
+//
+//            override fun surfaceChanged(
+//                holder: SurfaceHolder?,
+//                format: Int,
+//                width: Int,
+//                height: Int
+//            ) {
+//                LogUtils.d("surfaceChanged $holder, format=$format , width=$width, height=$height")
+//            }
+//
+//            override fun surfaceDestroyed(holder: SurfaceHolder?) {
+//                LogUtils.d("surfaceDestroyed $holder")
+//            }
+//        })
 
         X264Jni.setOnX264JniEncodeListener {
             fileWriter.writeData2File(it)
