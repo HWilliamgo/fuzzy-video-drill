@@ -17,7 +17,7 @@ import java.util.concurrent.Executors
  * @author: HWilliamgo
  * @description:
  */
-class CameraX(private val cocentext: Context) : ICamera {
+class CameraX(private val context: Context) : ICamera {
     companion object {
         private val TAG = CameraX::class.java.simpleName
     }
