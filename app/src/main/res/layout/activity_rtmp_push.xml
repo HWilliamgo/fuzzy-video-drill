@@ -3,10 +3,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".scene.rtmppush.RtmpPushActivity">
-
-    <SurfaceView
-        android:id="@+id/rtmp_push_surface_view"
+    <androidx.camera.view.PreviewView
+        android:id="@+id/rtmp_push_preview_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <Button
+        android:onClick="onClick"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/rtmp_push_btn_capture"
+        android:text="拍照"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </androidx.constraintlayout.widget.ConstraintLayout>

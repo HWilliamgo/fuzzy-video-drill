@@ -2,9 +2,10 @@ package com.hwilliamgo.fuzzy_video_drill.scene.rtmppush
 
 import android.Manifest
 import android.os.Bundle
-import android.view.SurfaceHolder
-import android.view.SurfaceView
+import android.os.Looper
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.view.PreviewView
 import com.blankj.utilcode.util.LogUtils
 import com.hwilliamgo.fuzzy_video_drill.BuildConfig
 import com.hwilliamgo.fuzzy_video_drill.R
@@ -15,7 +16,8 @@ import com.hwilliamgo.fuzzy_video_drill.ext.requestPermission
 import com.hwilliamgo.fuzzy_video_drill.util.file.FileWriterFactory
 import com.hwilliamgo.fuzzy_video_drill.util.file.FileWriterType
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
-import com.hwilliamgo.livertmp.jni.X264Jni
+import com.hwilliamgo.fuzzy_video_drill.util.video.VideoCapture
+import com.hwilliamgo.fuzzy_video_drill.util.video.YuvUtils
 
 class RtmpPushActivity : AppCompatActivity() {
     companion object {
@@ -23,7 +25,7 @@ class RtmpPushActivity : AppCompatActivity() {
         const val FRAME_RATE = 30
     }
 
-    private val rtmpPushSurfaceView: SurfaceView by lazy { findViewById(R.id.rtmp_push_surface_view) }
+    private val rtmpPushPreviewView: PreviewView by lazy { findViewById(R.id.rtmp_push_preview_view) }
     private var camera: ICamera? = null
     private val fileWriter: IFileWriter by lazy {
         FileWriterFactory.newFileWriter(
@@ -35,49 +37,52 @@ class RtmpPushActivity : AppCompatActivity() {
             FileWriterType.FAST_WRITER, "byteData_x264_encode_output.h264"
         )
     }
+    private var cameraWidth = 0
+    private var cameraHeight = 0
+    private var isCapture = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_rtmp_push)
         RtmpPushManager.init()
-//        X264Jni.init()
-        camera = CameraFactory.createCamera(CameraImplType.CAMERA_1)
-
-        rtmpPushSurfaceView.holder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                requestPermission(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) {
-                    camera?.init(holder) { w, h ->
-                        RtmpPushManager.setVideoEncoderInfo(w, h, FRAME_RATE, BITRATE)
+        requestPermission(
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) {
+            camera = CameraFactory.createCamera(this, CameraImplType.CAMERA_X)
+            rtmpPushPreviewView.addOnAttachStateChangeListener(object :
+                View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View?) {
+                    camera?.init(rtmpPushPreviewView, this@RtmpPushActivity) { width, height ->
+                        this@RtmpPushActivity.cameraWidth = width
+                        this@RtmpPushActivity.cameraHeight = height
+                        RtmpPushManager.setVideoEncoderInfo(
+                            cameraHeight,
+                            cameraWidth,
+                            FRAME_RATE,
+                            BITRATE
+                        )
                         RtmpPushManager.start(BuildConfig.RTMP_PUSH_URL)
-//                        X264Jni.setVideoCodecInfo(w, h, FRAME_RATE, BITRATE)
                     }
-                    camera?.setPreviewCallback { yuvData ->
-                        RtmpPushManager.pushVideo(yuvData)
-//                        X264Jni.encode(yuvData)
+                    camera?.setPreviewCallback { frameData ->
+                        if (isCapture) {
+                            isCapture = false
+                            VideoCapture.capturePortraitNV21(
+                                this@RtmpPushActivity,
+                                frameData,
+                                cameraWidth,
+                                cameraHeight
+                            )
+                        }
+                        LogUtils.d("当前线程是main线程吗？=${Thread.currentThread() == Looper.getMainLooper().thread}")
+                        // YUV旋转
+                        YuvUtils.rotateYUVClockwise90(frameData, cameraWidth, cameraHeight)
+                        RtmpPushManager.pushVideo(frameData)
                     }
                 }
-            }
 
-            override fun surfaceChanged(
-                holder: SurfaceHolder?,
-                format: Int,
-                width: Int,
-                height: Int
-            ) {
-                LogUtils.d("surfaceChanged $holder, format=$format , width=$width, height=$height")
-            }
-
-            override fun surfaceDestroyed(holder: SurfaceHolder?) {
-                LogUtils.d("surfaceDestroyed $holder")
-            }
-        })
-
-        X264Jni.setOnX264JniEncodeListener {
-            fileWriter.writeData2File(it)
-            byteFileWriter.writeData2File(it)
+                override fun onViewDetachedFromWindow(v: View?) {}
+            })
         }
     }
 
@@ -86,8 +91,15 @@ class RtmpPushActivity : AppCompatActivity() {
         camera?.destroy()
         fileWriter.destroy()
         byteFileWriter.destroy()
-//        X264Jni.destroy()
         RtmpPushManager.stop()
         RtmpPushManager.release()
+    }
+
+    fun onClick(view: View) {
+        when (view.id) {
+            R.id.rtmp_push_btn_capture -> {
+                isCapture = true
+            }
+        }
     }
 }
