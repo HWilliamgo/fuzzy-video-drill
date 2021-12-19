@@ -1,7 +1,7 @@
 package com.hwilliamgo.fuzzy_video_drill.camera
 
 import android.content.Context
-import android.util.Log
+import android.util.Size
 import android.view.SurfaceHolder
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -9,6 +9,7 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.window.WindowManager
+import com.blankj.utilcode.util.LogUtils
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -16,6 +17,10 @@ import java.util.concurrent.Executors
  * @date: 2021/12/1
  * @author: HWilliamgo
  * @description:
+ * androidx里面的CameraX的封装。由于CameraX使用方式上的和原先的Camera1有比较大的不同，因此无法在api上保持兼容性
+ * 他需要：
+ * 1. PreviewView
+ * 2. LifecycleOwner
  */
 class CameraX(private val context: Context) : ICamera {
     companion object {
@@ -31,14 +36,21 @@ class CameraX(private val context: Context) : ICamera {
     private var imageAnalyzer: ImageAnalysis? = null
     private var previewView: PreviewView? = null
     private var rotation: Int = 0
+    private val targetSize = Size(1080, 1920)
+
     private val cameraExecutor: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
 
-    fun setPrevieView(previewView: PreviewView) {
+    /**** Listener ****/
+    private var previewCallback: ICamera.PreviewCallback? = null
+
+    override fun init(
+        previewView: PreviewView,
+        lifecycleOwner: LifecycleOwner,
+        onCameraSizeReadyCallback: ICamera.OnCameraSizeReadyCallback
+    ) {
         this.previewView = previewView
         rotation = previewView.display.rotation
-    }
 
-    fun init(lifecycleOwner: LifecycleOwner) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
         cameraProviderFuture.addListener({
             // CameraProvider
@@ -53,6 +65,8 @@ class CameraX(private val context: Context) : ICamera {
 
             // Build and bind the camera use cases
             bindCameraUseCases(lifecycleOwner)
+            // 这里的高度和宽度是手机的高度和宽度，但是外部要的是相机的宽度和高度，而Android系统上相机刚好是横过来的，因此直接调换过来。
+            onCameraSizeReadyCallback.onCameraSizeReady(targetSize.height, targetSize.width)
         }, ContextCompat.getMainExecutor(context))
     }
 
@@ -60,13 +74,12 @@ class CameraX(private val context: Context) : ICamera {
         surfaceHolder: SurfaceHolder,
         onCameraSizeReadyCallback: ICamera.OnCameraSizeReadyCallback
     ) {
-
     }
 
     private fun bindCameraUseCases(lifecycleOwner: LifecycleOwner) {
         // Get screen metrics used to setup camera for full screen resolution
         val metrics = windowManager.getCurrentWindowMetrics().bounds
-        Log.d(TAG, "Screen metrics: ${metrics.width()} x ${metrics.height()}")
+        LogUtils.d(TAG, "Screen metrics: ${metrics.width()} x ${metrics.height()}")
 
         val screenAspectRatio = AspectRatio.RATIO_16_9
 
@@ -99,7 +112,8 @@ class CameraX(private val context: Context) : ICamera {
         // ImageAnalysis
         imageAnalyzer = ImageAnalysis.Builder()
             // We request aspect ratio but no resolution
-            .setTargetAspectRatio(screenAspectRatio)
+//            .setTargetAspectRatio(screenAspectRatio)
+            .setTargetResolution(targetSize)
             // Set initial target rotation, we will have to call this again if rotation changes
             // during the lifecycle of this use case
             .setTargetRotation(rotation)
@@ -107,7 +121,39 @@ class CameraX(private val context: Context) : ICamera {
             // The analyzer can then be assigned to the instance
             .also {
                 it.setAnalyzer(cameraExecutor, { imageProxy ->
-                    // yuv数据从这个变量取出来
+                    val planes = imageProxy.planes
+                    if (planes.size < 3) {
+                        return@setAnalyzer
+                    }
+                    val yBuffer = planes[0].buffer
+                    val uBuffer = planes[1].buffer
+                    val vBuffer = planes[2].buffer
+
+                    val ySize = yBuffer.remaining()
+                    val uSize = uBuffer.remaining()
+                    val vSize = vBuffer.remaining()
+
+//                    val nv21Buffer = ByteArray(ySize + uSize + vSize)
+//                    yBuffer.get(nv21Buffer, 0, ySize)
+//                    vBuffer.get(nv21Buffer, ySize, vSize)
+//                    uBuffer.get(nv21Buffer, ySize + vSize, uSize)
+                    val nv21Buffer = ByteArray(ySize * 3 / 2)
+                    yBuffer.get(nv21Buffer, 0, ySize)
+                    vBuffer.get(nv21Buffer, ySize, vSize)
+                    val u = ByteArray(uSize)
+                    uBuffer.get(u)
+                    var pos = ySize + 1
+                    for (i in 0..uSize) {
+                        if (i % 2 == 0) {
+                            nv21Buffer[pos] = u[i]
+                            pos += 2
+                        }
+                    }
+
+                    previewCallback?.onPreviewFrame(nv21Buffer)
+                    LogUtils.d("width=${imageProxy.width},height=${imageProxy.height}")
+
+                    imageProxy.close()
                 })
             }
         // bindToLifecycle这个函数调用非常关键，不调用没有画面渲染
@@ -122,7 +168,7 @@ class CameraX(private val context: Context) : ICamera {
     }
 
     override fun setPreviewCallback(callback: ICamera.PreviewCallback) {
-
+        this.previewCallback = callback
     }
 
     override fun destroy() {

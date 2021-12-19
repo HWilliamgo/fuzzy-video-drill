@@ -100,7 +100,7 @@ class CameraTestActivity : AppCompatActivity() {
 
     // <editor-fold defaultstate="collapsed" desc="初始化 - 相机">
     private fun startPreviewCamera() {
-        camera = CameraFactory.createCamera(CameraImplType.CAMERA_1)
+        camera = CameraFactory.createCamera(this,CameraImplType.CAMERA_1)
         camera?.init(cameraTestSurfaceView.holder) { width, height ->
             cameraWidth = width
             cameraHeight = height

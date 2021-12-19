@@ -103,7 +103,7 @@ class LocalCameraSurfaceView @JvmOverloads constructor(
 
     // <editor-fold defaultstate="collapsed" desc="初始化相机">
     private fun initCamera() {
-        camera = CameraFactory.createCamera(CameraImplType.CAMERA_1)
+        camera = CameraFactory.createCamera(context,CameraImplType.CAMERA_1)
         camera?.setPreviewCallback { data ->
             // TODO: 3/28/21 是否有必要为了防止缓冲数据在相机中写入与外部读取时机重叠引起异常，再copy到另一个byte array中？
             val buffer = ByteArray(data.size)

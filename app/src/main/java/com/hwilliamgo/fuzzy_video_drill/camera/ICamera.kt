@@ -1,6 +1,8 @@
 package com.hwilliamgo.fuzzy_video_drill.camera
 
 import android.view.SurfaceHolder
+import androidx.camera.view.PreviewView
+import androidx.lifecycle.LifecycleOwner
 
 /**
  * date: 2021/3/16
@@ -15,6 +17,21 @@ interface ICamera {
      * [onCameraSizeReadyCallback]相机尺寸初始化回调
      */
     fun init(surfaceHolder: SurfaceHolder, onCameraSizeReadyCallback: OnCameraSizeReadyCallback)
+
+    /**
+     * CameraX 专用初始化
+     * 当使用了CameraX的时候，请使用这个初始化函数
+     * [previewView] 渲染器
+     * [lifecycleOwner] 生命周期宿主
+     * [onCameraSizeReadyCallback] 相机尺寸回调
+     */
+    fun init(
+        previewView: PreviewView,
+        lifecycleOwner: LifecycleOwner,
+        onCameraSizeReadyCallback: ICamera.OnCameraSizeReadyCallback
+    ) {
+
+    }
 
     /**
      * 设置相机预览数据回调
@@ -40,6 +57,11 @@ interface ICamera {
      * 相机尺寸回调
      */
     fun interface OnCameraSizeReadyCallback {
+        /**
+         * 相机尺寸回调，Android的相机是横过来的，所以宽会比高要长。
+         * [width]
+         * [height]
+         */
         fun onCameraSizeReady(width: Int, height: Int)
     }
 }
