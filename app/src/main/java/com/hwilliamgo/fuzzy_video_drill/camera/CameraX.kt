@@ -133,23 +133,24 @@ class CameraX(private val context: Context) : ICamera {
                     val uSize = uBuffer.remaining()
                     val vSize = vBuffer.remaining()
 
-//                    val nv21Buffer = ByteArray(ySize + uSize + vSize)
-//                    yBuffer.get(nv21Buffer, 0, ySize)
-//                    vBuffer.get(nv21Buffer, ySize, vSize)
-//                    uBuffer.get(nv21Buffer, ySize + vSize, uSize)
+                    // 注意，CameraX会把他每个Y、U、V数据分别回调出来给我们，由我们自己组装，下面我们组装成NV21
+
                     val nv21Buffer = ByteArray(ySize * 3 / 2)
+                    // 先把Y填充了
                     yBuffer.get(nv21Buffer, 0, ySize)
+                    // 把后面剩下1/3的都先填充成v
                     vBuffer.get(nv21Buffer, ySize, vSize)
                     val u = ByteArray(uSize)
                     uBuffer.get(u)
                     var pos = ySize + 1
+                    // 将偶数位置的填充成u
                     for (i in 0..uSize) {
                         if (i % 2 == 0) {
                             nv21Buffer[pos] = u[i]
                             pos += 2
                         }
                     }
-
+                    // 此时[nv21Buffer]变量中就是NV21了
                     previewCallback?.onPreviewFrame(nv21Buffer)
                     LogUtils.d("width=${imageProxy.width},height=${imageProxy.height}")
 
