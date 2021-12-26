@@ -104,7 +104,7 @@ class CameraX(private val context: Context) : ICamera {
             // We request aspect ratio but no resolution to match preview config, but letting
             // CameraX optimize for whatever specific resolution best fits our use cases
             .setTargetAspectRatio(screenAspectRatio)
-            // Set initial target rotation, we will have to call this again if rotation changes
+            // Set initial target rotation, we will have to call this again if rotation changes is
             // during the lifecycle of this use case
             .setTargetRotation(rotation)
             .build()

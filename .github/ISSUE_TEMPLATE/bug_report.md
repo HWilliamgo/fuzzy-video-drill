@@ -1,8 +1,8 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: ''
+title: '【BUG】自定义标题'
+labels: bug
 assignees: ''
 
 ---
