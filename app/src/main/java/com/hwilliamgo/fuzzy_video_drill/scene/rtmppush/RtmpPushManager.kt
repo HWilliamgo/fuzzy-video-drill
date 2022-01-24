@@ -1,7 +1,6 @@
 package com.hwilliamgo.fuzzy_video_drill.scene.rtmppush
 
 import com.hwilliamgo.livertmp.jni.RTMPX264Jni
-import com.hwilliamgo.livertmp.jni.X264Jni
 
 /**
  * date: 2021/8/1
@@ -17,12 +16,20 @@ object RtmpPushManager {
         RTMPX264Jni.native_setVideoEncoderInfo(width, height, fps, bitrate)
     }
 
+    fun setAudioEncoderInfo(sampleRate: Int, channels: Int) {
+        RTMPX264Jni.native_setAudioEncoderInfo(sampleRate, channels)
+    }
+
     fun start(url: String) {
         RTMPX264Jni.native_start(url)
     }
 
     fun pushVideo(yuvData: ByteArray) {
         RTMPX264Jni.native_pushVideo(yuvData)
+    }
+
+    fun pushAudio(pcmData: ByteArray) {
+        RTMPX264Jni.natvie_pushAudio(pcmData)
     }
 
     fun stop() {

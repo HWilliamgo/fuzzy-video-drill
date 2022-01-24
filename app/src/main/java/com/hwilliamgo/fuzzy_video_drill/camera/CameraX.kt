@@ -152,7 +152,6 @@ class CameraX(private val context: Context) : ICamera {
                     }
                     // 此时[nv21Buffer]变量中就是NV21了
                     previewCallback?.onPreviewFrame(nv21Buffer)
-                    LogUtils.d("width=${imageProxy.width},height=${imageProxy.height}")
 
                     imageProxy.close()
                 })
