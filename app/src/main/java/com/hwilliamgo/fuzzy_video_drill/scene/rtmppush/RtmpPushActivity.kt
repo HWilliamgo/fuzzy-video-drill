@@ -2,10 +2,10 @@ package com.hwilliamgo.fuzzy_video_drill.scene.rtmppush
 
 import android.Manifest
 import android.os.Bundle
+import android.view.SurfaceHolder
+import android.view.SurfaceView
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.view.PreviewView
-import com.blankj.utilcode.util.LogUtils
 import com.hwilliamgo.fuzzy_video_drill.BuildConfig
 import com.hwilliamgo.fuzzy_video_drill.R
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraFactory
@@ -18,15 +18,17 @@ import com.hwilliamgo.fuzzy_video_drill.util.file.FileWriterType
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.video.VideoCapture
 import com.hwilliamgo.fuzzy_video_drill.util.video.YuvUtils
+import kotlinx.android.synthetic.main.activity_screen_projection_watch.*
 
 class RtmpPushActivity : AppCompatActivity() {
     companion object {
         const val BITRATE = 1080 * 1920
-        const val FRAME_RATE = 30
+        const val FRAME_RATE = 15
     }
 
     /**** View ****/
-    private val rtmpPushPreviewView: PreviewView by lazy { findViewById(R.id.rtmp_push_preview_view) }
+//    private val rtmpPushPreviewView: PreviewView by lazy { findViewById(R.id.rtmp_push_preview_view) }
+    private val rtmpPushSurfaceView: SurfaceView by lazy { findViewById(R.id.rtmp_push_surface_view) }
 
     /**** 核心引擎 ****/
     private var camera: ICamera? = null
@@ -58,25 +60,44 @@ class RtmpPushActivity : AppCompatActivity() {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) {
-            camera = CameraFactory.createCamera(this, CameraImplType.CAMERA_X)
-            rtmpPushPreviewView.addOnAttachStateChangeListener(object :
-                View.OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(v: View?) {
+            camera = CameraFactory.createCamera(this, CameraImplType.CAMERA_1)
+            rtmpPushSurfaceView.holder.addCallback(object : SurfaceHolder.Callback2 {
+                override fun surfaceCreated(holder: SurfaceHolder?) {
                     initCamera()
                 }
 
-                override fun onViewDetachedFromWindow(v: View?) {}
-            })
+                override fun surfaceChanged(
+                    holder: SurfaceHolder?,
+                    format: Int,
+                    width: Int,
+                    height: Int
+                ) {
+                }
 
-            RtmpPushManager.setAudioEncoderInfo(
+                override fun surfaceDestroyed(holder: SurfaceHolder?) {
+                }
+
+                override fun surfaceRedrawNeeded(holder: SurfaceHolder?) {
+                }
+            })
+//            rtmpPushPreviewView.addOnAttachStateChangeListener(object :
+//                View.OnAttachStateChangeListener {
+//                override fun onViewAttachedToWindow(v: View?) {
+//                    initCamera()
+//                }
+//
+//                override fun onViewDetachedFromWindow(v: View?) {}
+//            })
+
+            val inputBufferSize = RtmpPushManager.setAudioEncoderInfo(
                 AudioRecorder.SAMPLE_RATGE,
                 2
             )// channels这里只能写1或者2，不能用AudioFormat的常量
             audioRecorder = AudioRecorder()
-            audioRecorder?.init()
+            audioRecorder?.init(inputBufferSize)
             audioRecorder?.setAudioDataCallback(object : AudioRecorder.AudioCallDataback {
                 override fun onAudioData(pcmData: ByteArray) {
-                    LogUtils.d("pcmData=$pcmData")
+//                    LogUtils.d("pcmData=$pcmData")
                     // todo 取消注释
                     RtmpPushManager.pushAudio(pcmData)
                 }
@@ -96,7 +117,18 @@ class RtmpPushActivity : AppCompatActivity() {
     }
 
     private fun initCamera() {
-        camera?.init(rtmpPushPreviewView, this@RtmpPushActivity) { width, height ->
+//        camera?.init(rtmpPushPreviewView, this@RtmpPushActivity) { width, height ->
+//            this@RtmpPushActivity.cameraWidth = width
+//            this@RtmpPushActivity.cameraHeight = height
+//            RtmpPushManager.setVideoEncoderInfo(
+//                cameraHeight,
+//                cameraWidth,
+//                FRAME_RATE,
+//                BITRATE
+//            )
+//            RtmpPushManager.start(BuildConfig.RTMP_PUSH_URL)
+//        }
+        camera?.init(rtmpPushSurfaceView.holder) { width, height ->
             this@RtmpPushActivity.cameraWidth = width
             this@RtmpPushActivity.cameraHeight = height
             RtmpPushManager.setVideoEncoderInfo(

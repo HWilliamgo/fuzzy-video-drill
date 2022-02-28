@@ -5,7 +5,7 @@ import com.hwilliamgo.livertmp.jni.RTMPX264Jni
 /**
  * date: 2021/8/1
  * author: HWilliamgo
- * description:
+ * description: RTMP推流管理器
  */
 object RtmpPushManager {
     fun init() {
@@ -16,8 +16,8 @@ object RtmpPushManager {
         RTMPX264Jni.native_setVideoEncoderInfo(width, height, fps, bitrate)
     }
 
-    fun setAudioEncoderInfo(sampleRate: Int, channels: Int) {
-        RTMPX264Jni.native_setAudioEncoderInfo(sampleRate, channels)
+    fun setAudioEncoderInfo(sampleRate: Int, channels: Int): Int {
+        return RTMPX264Jni.native_setAudioEncoderInfo(sampleRate, channels)
     }
 
     fun start(url: String) {

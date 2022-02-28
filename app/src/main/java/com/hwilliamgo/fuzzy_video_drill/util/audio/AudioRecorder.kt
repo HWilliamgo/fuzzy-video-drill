@@ -35,10 +35,13 @@ class AudioRecorder {
     /**** Listener ****/
     private var audioCallDataback: AudioCallDataback? = null
 
-    fun init() {
-        minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATGE, CHANNELS, AUDIO_FORMAT)
-        LogUtils.d("minBufferSize=$minBufferSize")
-//        minBufferSize = 12288
+    fun init(bufferSizeInByte: Int) {
+        if (bufferSizeInByte <= 0) {
+            LogUtils.e("bufferSizeInByte <= 0 , can't init AudioRecorder")
+            return
+        }
+        minBufferSize = bufferSizeInByte
+        LogUtils.d("bufferSizeInByte=$minBufferSize")
         buffer = ByteArray(minBufferSize)
 
         handlerThread = object : HandlerThread(AudioRecorder::class.java.name) {

@@ -10,6 +10,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <SurfaceView
+        android:id="@+id/rtmp_push_surface_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <Button
         android:onClick="onClick"
         app:layout_constraintTop_toTopOf="parent"
