@@ -28,8 +28,8 @@ object RtmpPushManager {
         RTMPX264Jni.native_pushVideo(yuvData)
     }
 
-    fun pushAudio(pcmData: ByteArray) {
-        RTMPX264Jni.natvie_pushAudio(pcmData)
+    fun pushAudio(pcmData: ByteArray, end: Int, length: Int) {
+        RTMPX264Jni.natvie_pushAudio(pcmData, end, length)
     }
 
     fun stop() {

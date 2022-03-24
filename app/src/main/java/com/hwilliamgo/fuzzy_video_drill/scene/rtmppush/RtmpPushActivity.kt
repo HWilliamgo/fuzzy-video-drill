@@ -6,19 +6,26 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.hwilliamgo.fuzzy_video_drill.BuildConfig
 import com.hwilliamgo.fuzzy_video_drill.R
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraFactory
 import com.hwilliamgo.fuzzy_video_drill.camera.CameraImplType
 import com.hwilliamgo.fuzzy_video_drill.camera.ICamera
 import com.hwilliamgo.fuzzy_video_drill.ext.requestPermission
+import com.hwilliamgo.fuzzy_video_drill.scene.fasttest.FastTestActivity
 import com.hwilliamgo.fuzzy_video_drill.util.audio.AudioRecorder
+import com.hwilliamgo.fuzzy_video_drill.util.audio.PcmToWavUtil
 import com.hwilliamgo.fuzzy_video_drill.util.file.FileWriterFactory
 import com.hwilliamgo.fuzzy_video_drill.util.file.FileWriterType
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.video.VideoCapture
 import com.hwilliamgo.fuzzy_video_drill.util.video.YuvUtils
 import kotlinx.android.synthetic.main.activity_screen_projection_watch.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 class RtmpPushActivity : AppCompatActivity() {
     companion object {
@@ -40,11 +47,17 @@ class RtmpPushActivity : AppCompatActivity() {
             FileWriterType.HEX_STRING_WRITER, "x264_encod_output.txt"
         )
     }
-    private val byteFileWriter: IFileWriter by lazy {
+    private val audioPcmFileWriter: IFileWriter by lazy {
         FileWriterFactory.newFileWriter(
-            FileWriterType.FAST_WRITER, "byteData_x264_encode_output.h264"
+            FileWriterType.FAST_WRITER, "rtmp_push_audio_pcm.pcm"
         )
     }
+    private val audioPcmFileWriter2: IFileWriter by lazy {
+        FileWriterFactory.newFileWriter(
+            FileWriterType.FAST_WRITER, "rtmp_push_audio_pcm2.pcm"
+        )
+    }
+    private var pcmToWavUtil: PcmToWavUtil? = null
 
     /**** 状态变量 ****/
     private var cameraWidth = 0
@@ -89,17 +102,27 @@ class RtmpPushActivity : AppCompatActivity() {
 //                override fun onViewDetachedFromWindow(v: View?) {}
 //            })
 
+            pcmToWavUtil = PcmToWavUtil(
+                AudioRecorder.SAMPLE_RATGE,
+                AudioRecorder.CHANNELS_MASK,
+                AudioRecorder.CHANNELS_COUNT,
+                AudioRecorder.AUDIO_FORMAT
+            )
+
             val inputBufferSize = RtmpPushManager.setAudioEncoderInfo(
                 AudioRecorder.SAMPLE_RATGE,
-                2
+                AudioRecorder.CHANNELS_COUNT
             )// channels这里只能写1或者2，不能用AudioFormat的常量
             audioRecorder = AudioRecorder()
             audioRecorder?.init(inputBufferSize)
             audioRecorder?.setAudioDataCallback(object : AudioRecorder.AudioCallDataback {
-                override fun onAudioData(pcmData: ByteArray) {
-//                    LogUtils.d("pcmData=$pcmData")
-                    // todo 取消注释
-                    RtmpPushManager.pushAudio(pcmData)
+                override fun onAudioData(pcmData: ByteArray, end: Int, length: Int) {
+//                    RtmpPushManager.pushAudio(pcmData,end,length)
+                    audioPcmFileWriter.writeData2File(pcmData, end)
+                }
+
+                override fun onAudioDara2(pcmData: ByteArray, end: Int, length: Int) {
+                    audioPcmFileWriter2.writeData2File(pcmData, end)
                 }
             })
             audioRecorder?.startRecord()
@@ -111,7 +134,8 @@ class RtmpPushActivity : AppCompatActivity() {
         camera?.destroy()
         audioRecorder?.destroy()
         fileWriter.destroy()
-        byteFileWriter.destroy()
+        audioPcmFileWriter.destroy()
+        audioPcmFileWriter2.destroy()
         RtmpPushManager.stop()
         RtmpPushManager.release()
     }
@@ -160,6 +184,38 @@ class RtmpPushActivity : AppCompatActivity() {
             R.id.rtmp_push_btn_capture -> {
                 isCapture = true
             }
+            R.id.rtmp_push_btn_pcm_to_wav -> {
+                lifecycleScope.launch {
+                    val outputFile1 = convertPcm2WavAndJumpToPlay(
+                        audioPcmFileWriter2.getOutputFile().absolutePath,
+                        "rtmp_push_wav2.wav"
+                    )
+                    val outputFile2 = convertPcm2WavAndJumpToPlay(
+                        audioPcmFileWriter.getOutputFile().absolutePath,
+                        "rtmp_push_wav.wav"
+                    )
+                    finish()
+                    FastTestActivity.launch(this@RtmpPushActivity, outputFile1, outputFile2)
+                }
+            }
         }
+    }
+
+    private suspend fun convertPcm2WavAndJumpToPlay(
+        pcmFilePath: String,
+        outputWavFileName: String
+    ): String {
+        val outputFile = File(externalCacheDir, outputWavFileName)
+        withContext(Dispatchers.IO) {
+            if (outputFile.exists()) {
+                outputFile.delete()
+            }
+            outputFile.createNewFile()
+            pcmToWavUtil?.pcmToWav(
+                pcmFilePath,
+                outputFile.absolutePath
+            )
+        }
+        return outputFile.absolutePath
     }
 }

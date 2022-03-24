@@ -7,6 +7,7 @@ import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.util.Log
 import com.blankj.utilcode.util.Utils
+import com.hwilliamgo.fuzzy_video_drill.VideoDrillApp
 import com.hwilliamgo.fuzzy_video_drill.util.MediaTrackSelector
 import com.hwilliamgo.fuzzy_video_drill.util.file.inner.HexStringFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
@@ -36,7 +37,7 @@ object AudioClipper {
         if (endTime < startTime) {
             return
         }
-        val fileWriter: IFileWriter = HexStringFileWriter("audio-clip.txt")
+        val fileWriter: IFileWriter = HexStringFileWriter(VideoDrillApp.getInstance(),"audio-clip.txt")
         val outputTmpPcm = File(Utils.getApp().cacheDir, "outputTmpPcm.pcm")
         val audioFormat = decodeToPcm(
             inputPath, outputTmpPcm.absolutePath, startTime, endTime

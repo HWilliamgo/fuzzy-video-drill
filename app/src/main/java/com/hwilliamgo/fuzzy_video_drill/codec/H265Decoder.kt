@@ -5,6 +5,7 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.view.Surface
 import com.blankj.utilcode.util.LogUtils
+import com.hwilliamgo.fuzzy_video_drill.VideoDrillApp
 import com.hwilliamgo.fuzzy_video_drill.util.file.inner.FastFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
 
@@ -43,7 +44,7 @@ class H265Decoder : IDecoder {
             e.printStackTrace()
         }
 
-        fastFileWriter= FastFileWriter("rawh265data.h265")
+        fastFileWriter= FastFileWriter(VideoDrillApp.getInstance(),"rawh265data.h265")
     }
 
     override fun setOutputSurface(surface: Surface) {

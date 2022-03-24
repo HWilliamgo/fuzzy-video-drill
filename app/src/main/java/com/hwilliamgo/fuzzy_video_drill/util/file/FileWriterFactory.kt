@@ -1,5 +1,6 @@
 package com.hwilliamgo.fuzzy_video_drill.util.file
 
+import com.hwilliamgo.fuzzy_video_drill.VideoDrillApp
 import com.hwilliamgo.fuzzy_video_drill.util.file.inner.FastFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.file.inner.HexStringFileWriter
 
@@ -11,8 +12,14 @@ import com.hwilliamgo.fuzzy_video_drill.util.file.inner.HexStringFileWriter
 object FileWriterFactory {
     fun newFileWriter(type: FileWriterType, outputFileName: String): IFileWriter {
         return when (type) {
-            FileWriterType.FAST_WRITER -> FastFileWriter(outputFileName)
-            FileWriterType.HEX_STRING_WRITER -> HexStringFileWriter(outputFileName)
+            FileWriterType.FAST_WRITER -> FastFileWriter(
+                VideoDrillApp.getInstance(),
+                outputFileName
+            )
+            FileWriterType.HEX_STRING_WRITER -> HexStringFileWriter(
+                VideoDrillApp.getInstance(),
+                outputFileName
+            )
         }
     }
 }

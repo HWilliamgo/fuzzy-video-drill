@@ -4,6 +4,7 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.util.Log
+import com.hwilliamgo.fuzzy_video_drill.VideoDrillApp
 import com.hwilliamgo.fuzzy_video_drill.util.file.inner.FastFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.file.inner.HexStringFileWriter
 import com.hwilliamgo.fuzzy_video_drill.util.file.IFileWriter
@@ -49,13 +50,13 @@ class H265Encoder : IEncoder {
 
     override fun enableOutputRawEncodeStream(enable: Boolean) {
         if (enable) {
-            fastFileWriter = FastFileWriter("encoderh265.h265")
+            fastFileWriter = FastFileWriter(VideoDrillApp.getInstance(),"encoderh265.h265")
         }
     }
 
     override fun enableOutputHexStreamData(enable: Boolean) {
         if (enable) {
-            hexStringFileWriter = HexStringFileWriter("encoderh265HexString.txt")
+            hexStringFileWriter = HexStringFileWriter(VideoDrillApp.getInstance(),"encoderh265HexString.txt")
         }
     }
 

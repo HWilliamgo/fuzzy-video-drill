@@ -11,16 +11,27 @@ import android.media.AudioTrack
  * description: AudioTrack音频播放器
  */
 class AudioPlayer {
+    private var sampleRate = 44100
+    private var encoding = AudioFormat.ENCODING_PCM_16BIT
+    private var channelCount = 2
+
+
     private var audioTrack: AudioTrack? = null
+
+    fun setConfig(sampleRate: Int, encoding: Int, channelCount: Int) {
+        this.sampleRate = sampleRate
+        this.encoding = encoding
+        this.channelCount = channelCount
+    }
 
     fun start() {
         val audioAttr = AudioAttributes.Builder()
             .setLegacyStreamType(AudioManager.STREAM_MUSIC)
             .build()
         val audioFormat = AudioFormat.Builder()
-            .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
-            .setSampleRate(44100)
-            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+            .setChannelMask(if (channelCount == 1) AudioFormat.CHANNEL_OUT_MONO else AudioFormat.CHANNEL_OUT_STEREO)
+            .setSampleRate(sampleRate)
+            .setEncoding(encoding)
             .build()
         audioTrack = AudioTrack(
             audioAttr,

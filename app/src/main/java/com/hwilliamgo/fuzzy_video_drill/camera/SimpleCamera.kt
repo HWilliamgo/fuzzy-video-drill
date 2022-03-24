@@ -95,7 +95,7 @@ class SimpleCamera : ICamera {
                 LogUtils.d("buffer hash=${buffer.hashCode()}")
                 it.addCallbackBuffer(buffer)
                 it.setPreviewCallbackWithBuffer { data, camera ->
-//                    onPreviewCallback?.onPreviewFrame(data)
+                    onPreviewCallback?.onPreviewFrame(data)
                     camera.addCallbackBuffer(buffer)
                 }
                 it.startPreview()
